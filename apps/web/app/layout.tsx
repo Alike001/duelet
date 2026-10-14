@@ -1,18 +1,13 @@
 import type { Metadata } from 'next';
-import { Instrument_Serif, Manrope } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { Providers } from '@/components/providers';
 
 import './globals.css';
+import './final-theme.css';
 
-const display = Instrument_Serif({
-  subsets: ['latin'],
-  weight: '400',
-  variable: '--font-display',
-});
-
-const sans = Manrope({
+const sans = Plus_Jakarta_Sans({
   subsets: ['latin'],
   variable: '--font-sans',
 });
@@ -31,7 +26,7 @@ export default function RootLayout({
 }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${display.variable} ${sans.variable}`}>
+      <body className={sans.variable}>
         <Providers>{children}</Providers>
       </body>
     </html>
