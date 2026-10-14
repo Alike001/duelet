@@ -257,7 +257,7 @@ export function InvoiceView({
       : Number((data.vested * 10_000n) / data.totalAmount) / 100;
   const preserved = data.vested - data.withdrawnAmount;
   return (
-    <div className="invoice-view">
+    <div className={proof ? 'invoice-view proof-view' : 'invoice-view'}>
       <div className="invoice-top">
         <div>
           <div className="invoice-status-line">
@@ -301,13 +301,13 @@ export function InvoiceView({
       </div>
       <section className="financial-hero">
         <div className="financial-main">
-          <span>Original deposit</span>
+          <span>Original payment</span>
           <strong>{formatUsdc(data.totalAmount)}</strong>
           <small>USDC</small>
         </div>
         <div className="financial-progress">
           <div>
-            <span>Vested</span>
+            <span>Earned over time</span>
             <strong>{formatUsdc(data.vested)} USDC</strong>
           </div>
           <div className="progress-track light">
@@ -318,19 +318,19 @@ export function InvoiceView({
       </section>
       <section className="metric-strip">
         <article>
-          <span>Withdrawn</span>
+          <span>Already withdrawn</span>
           <strong>{formatUsdc(data.withdrawnAmount)}</strong>
         </article>
         <article className="claim">
-          <span>Claimable now</span>
+          <span>Available to claim</span>
           <strong>{formatUsdc(data.claimable)}</strong>
         </article>
         <article>
-          <span>Refundable now</span>
+          <span>Returnable to payer</span>
           <strong>{formatUsdc(data.refundable)}</strong>
         </article>
         <article>
-          <span>Outstanding liability</span>
+          <span>Remaining scheduled payment</span>
           <strong>{formatUsdc(data.liability)}</strong>
         </article>
       </section>
@@ -340,7 +340,8 @@ export function InvoiceView({
             <div>
               <h2>Payment timeline</h2>
               <p className="panel-subtitle">
-                Entitlement accrues; funds move only when a claim is triggered.
+                The recipient earns funds over time; USDC moves when a claim is
+                triggered.
               </p>
             </div>
           </div>
@@ -371,7 +372,7 @@ export function InvoiceView({
               <strong>{shortHash(data.payer, 8)}</strong>
             </div>
             <div>
-              <span>Payee</span>
+              <span>Recipient</span>
               <strong>{shortHash(data.payee, 8)}</strong>
             </div>
           </div>
@@ -408,12 +409,26 @@ export function InvoiceView({
           {data.payer.toLowerCase() === connection.address?.toLowerCase() &&
             data.refundable > 0n && (
               <div className="cancel-action">
-                <strong>Cancel stream</strong>
-                <p>
-                  Estimated now: {formatUsdc(data.refundable)} refunded. Payee
-                  preserves {formatUsdc(preserved)} unclaimed entitlement. This
-                  estimate changes with time.
-                </p>
+                <strong>Cancel payment schedule</strong>
+                <p>This preview refreshes as the recipient earns more.</p>
+                <dl className="cancel-consequences">
+                  <div>
+                    <dt>Already earned</dt>
+                    <dd>{formatUsdc(data.vested)} USDC</dd>
+                  </div>
+                  <div>
+                    <dt>Already withdrawn</dt>
+                    <dd>{formatUsdc(data.withdrawnAmount)} USDC</dd>
+                  </div>
+                  <div>
+                    <dt>Still owed to recipient</dt>
+                    <dd>{formatUsdc(preserved)} USDC</dd>
+                  </div>
+                  <div>
+                    <dt>Returned to payer</dt>
+                    <dd>{formatUsdc(data.refundable)} USDC</dd>
+                  </div>
+                </dl>
                 <button
                   className="button button-danger"
                   disabled={
@@ -496,12 +511,12 @@ export function InvoiceView({
       <section className="panel reconciliation">
         <div>
           <p className="eyebrow">Financial reconciliation</p>
-          <h2>Every deposited unit has one accountable destination.</h2>
+          <h2>Every funded unit has one accountable destination.</h2>
         </div>
         <div className="recon-equation">
           <div>
             <strong>{formatUsdc(data.totalAmount)}</strong>
-            <span>Original deposit</span>
+            <span>Original funding</span>
           </div>
           <b>=</b>
           <div>
@@ -516,7 +531,7 @@ export function InvoiceView({
           <b>+</b>
           <div>
             <strong>{formatUsdc(data.liability)}</strong>
-            <span>Liability</span>
+            <span>Remaining</span>
           </div>
         </div>
       </section>

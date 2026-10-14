@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { ArrowIcon, ClockIcon, ShieldIcon } from '@/components/icons';
+import { ArrowIcon } from '@/components/icons';
 import { LandingMotion } from '@/components/landing-motion';
 import { PageShell } from '@/components/page-shell';
 import { StreamDemo } from '@/components/stream-demo';
@@ -9,206 +9,188 @@ export default function HomePage() {
   return (
     <PageShell>
       <LandingMotion>
-        <section className="hero">
-          <div className="hero-kicker">
-            <p className="eyebrow">USDC invoice streaming on Arc</p>
-            <span>01 / Funded payment infrastructure</span>
-          </div>
-          <div className="hero-copy">
-            <h1>
-              Invoice once. <span>Pay over time.</span>
-            </h1>
-            <div className="hero-intro">
-              <p className="hero-lede">
-                Fund an invoice in USDC on Arc. Payments vest over time,
-                recipients claim earned funds, and unused escrow returns to the
-                payer when a stream is canceled.
-              </p>
-              <div className="hero-actions">
-                <Link className="button button-accent" href="/invoices/new">
-                  Create an invoice <ArrowIcon />
-                </Link>
-                <a className="button button-ghost" href="#how-it-works">
-                  Explore how it works
-                </a>
-              </div>
+        <section className="home-hero">
+          <div className="home-hero-copy">
+            <div className="network-chip">
+              <span>USDC</span>
+              <i />
+              <span>Arc mainnet</span>
+            </div>
+            <h1>Invoice once. Pay over time.</h1>
+            <p>
+              Fund a business payment upfront. Your recipient earns USDC on a
+              clear schedule, while every dollar stays accounted for onchain.
+            </p>
+            <div className="hero-actions">
+              <Link className="button button-accent" href="/invoices/new">
+                Create payment <ArrowIcon />
+              </Link>
+              <Link className="text-link" href="/proof/preview">
+                Explore an example <span>→</span>
+              </Link>
+            </div>
+            <div className="hero-assurance">
+              <span>Fully funded before it starts</span>
+              <span>Recipient address cannot change</span>
+              <span>No admin access to escrow</span>
             </div>
           </div>
           <StreamDemo />
-          <div className="hero-footnotes" aria-label="Duelet properties">
-            <span>01 Fully funded before creation</span>
-            <span>02 Payee destination is immutable</span>
-            <span>03 Public accounting proof</span>
-            <span>Preview · no contract deployed</span>
-          </div>
         </section>
 
-        <section className="marquee" aria-label="Product principles">
-          <div>
-            <span>Fully funded before vesting</span>
-            <i /> <span>Claims always reach the payee</span>
-            <i /> <span>Unused escrow returns on cancellation</span>
-            <i /> <span>Every balance reconciles onchain</span>
-            <i />
+        <section className="home-section how-section" id="how-it-works">
+          <div className="section-heading">
+            <span>How it works</span>
+            <h2>
+              One funded invoice. A payment schedule both sides can follow.
+            </h2>
           </div>
-        </section>
-
-        <section className="chapter" id="how-it-works">
-          <div className="chapter-heading">
-            <p className="eyebrow">One invoice. One escrow. One clear exit.</p>
-            <h2>Payment terms become a timeline, not a collection problem.</h2>
-          </div>
-          <div className="steps-grid">
+          <div className="process-line">
             <article>
               <span>01</span>
-              <div className="step-icon">
-                <ShieldIcon />
-              </div>
-              <h3>Create</h3>
+              <h3>Create the payment</h3>
               <p>
-                Set a payee, exact USDC amount, and immutable start and end
-                times. The invoice reference is bound to the payer and
-                deployment.
+                Choose the recipient, exact USDC amount, and payment period.
               </p>
             </article>
             <article>
               <span>02</span>
-              <div className="step-icon">
-                <span className="coin">$</span>
-              </div>
-              <h3>Fund</h3>
+              <h3>Fund it once</h3>
               <p>
-                Approve only the invoice amount. Duelet creates the stream only
-                after the complete deposit arrives in escrow.
+                The complete amount enters escrow before the schedule exists.
               </p>
             </article>
             <article>
               <span>03</span>
-              <div className="step-icon">
-                <ClockIcon />
-              </div>
-              <h3>Claim</h3>
+              <h3>Claim as it vests</h3>
               <p>
-                Entitlement vests each second. Anyone can trigger a claim, but
-                USDC can only go to the immutable payee.
+                Earned USDC becomes available over time and moves when claimed.
               </p>
             </article>
           </div>
         </section>
 
-        <section className="mechanism-grid">
-          <article className="mechanism-primary">
-            <p className="eyebrow">Cancellation without confiscation</p>
-            <h2>
-              Stop the future.
-              <br />
-              Preserve what was earned.
-            </h2>
+        <section className="home-section role-section">
+          <div className="role-intro">
+            <span>Built for both sides</span>
+            <h2>A clearer way to fund work and receive payment.</h2>
+          </div>
+          <div className="role-columns">
+            <article>
+              <div className="role-number">P</div>
+              <div>
+                <span>For the payer</span>
+                <h3>
+                  Commit the full budget without paying ahead of progress.
+                </h3>
+                <ul>
+                  <li>Fund the complete invoice upfront</li>
+                  <li>Track vested and remaining scheduled amounts</li>
+                  <li>Cancel future vesting and recover unused escrow</li>
+                </ul>
+              </div>
+            </article>
+            <article>
+              <div className="role-number recipient">R</div>
+              <div>
+                <span>For the recipient</span>
+                <h3>See exactly what is earned and available to claim.</h3>
+                <ul>
+                  <li>Payment terms cannot change after funding</li>
+                  <li>Earned funds survive cancellation</li>
+                  <li>Claims always pay the stored recipient address</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section className="home-section cancellation-section">
+          <div className="cancellation-copy">
+            <span>Fair cancellation</span>
+            <h2>Stop what comes next. Keep what was already earned.</h2>
             <p>
-              When the payer cancels, vesting freezes. Unvested USDC returns
-              immediately; every vested but unclaimed unit remains owed to the
-              payee.
+              Cancellation freezes the schedule. The unvested portion returns to
+              the payer immediately, while the recipient keeps every vested
+              unit—even if it has not been claimed yet.
             </p>
-            <div className="split-bar">
-              <span style={{ width: '33.33%' }}>Earned 3,333</span>
-              <span style={{ width: '66.67%' }}>Refund 6,667</span>
+          </div>
+          <div className="cancellation-example">
+            <div className="example-head">
+              <span>Example at 60 seconds</span>
+              <strong>10,000 base units funded</strong>
             </div>
-            <p className="microcopy">
-              Illustrative deterministic fixture · 10,000 base units
-            </p>
-          </article>
-          <article className="mechanism-accounting">
-            <p className="eyebrow">Accounting identity</p>
-            <div className="equation">
-              <strong>10,000</strong>
-              <span>original deposit</span>
+            <div className="allocation-bar">
+              <span style={{ width: '33.33%' }}>Earned</span>
+              <span style={{ width: '66.67%' }}>Returned</span>
+            </div>
+            <dl>
+              <div>
+                <dt>Recipient earned</dt>
+                <dd>3,333</dd>
+              </div>
+              <div>
+                <dt>Payer refund</dt>
+                <dd>6,667</dd>
+              </div>
+              <div>
+                <dt>Unaccounted</dt>
+                <dd>0</dd>
+              </div>
+            </dl>
+          </div>
+        </section>
+
+        <section className="home-section proof-section">
+          <div className="proof-equation">
+            <span>Public reconciliation</span>
+            <div>
+              <strong>Funding</strong>
               <b>=</b>
-              <div>
-                <strong>3,333</strong>
-                <span>withdrawn</span>
-              </div>
+              <strong>Withdrawn</strong>
               <b>+</b>
-              <div>
-                <strong>6,667</strong>
-                <span>refunded</span>
-              </div>
+              <strong>Refunded</strong>
               <b>+</b>
-              <div>
-                <strong>0</strong>
-                <span>liability</span>
-              </div>
+              <strong>Remaining</strong>
             </div>
-          </article>
-          <article className="mechanism-small">
-            <h3>Arc-native settlement</h3>
-            <p>
-              USDC is both the payment asset and Arc’s native gas asset, while
-              contract amounts retain the ERC-20’s six-decimal units.
-            </p>
-          </article>
-          <article className="mechanism-small dark">
-            <h3>No hidden operator</h3>
-            <p>
-              No owner, proxy, fee collector, sweep, or arbitrary execution
-              path. Rights live in contract state.
-            </p>
-          </article>
-          <article className="mechanism-small warning">
-            <h3>Unaudited by design disclosure</h3>
-            <p>
-              Tests are extensive, not an audit. Circle can pause or block USDC
-              transfers. Start with minimal value.
-            </p>
-          </article>
-        </section>
-
-        <section className="trust-section">
-          <div>
-            <p className="eyebrow">Verify, don’t take our word for it</p>
-            <h2>
-              The interface explains the contract. The contract remains the
-              authority.
-            </h2>
           </div>
-          <div className="trust-list">
-            <article>
-              <span>01</span>
-              <h3>Exact balances</h3>
-              <p>
-                Funding and payouts validate token balance deltas. Failed
-                transfers revert accounting atomically.
-              </p>
-            </article>
-            <article>
-              <span>02</span>
-              <h3>Independent recovery</h3>
-              <p>
-                Claims and cancellation can be submitted directly through any
-                EVM wallet if the frontend disappears.
-              </p>
-            </article>
-            <article>
-              <span>03</span>
-              <h3>Public proof</h3>
-              <p>
-                Invoice state, events, transaction receipts, and the
-                reconciliation identity are available to reviewers.
-              </p>
-            </article>
+          <div className="proof-copy">
+            <h2>A payment receipt anyone can verify.</h2>
+            <p>
+              Each invoice exposes its funded amount, payment schedule, claims,
+              refunds, remaining escrow, and confirmed transaction evidence.
+            </p>
+            <Link className="text-link" href="/proof/preview">
+              View illustrative proof <span>→</span>
+            </Link>
           </div>
         </section>
 
-        <section className="closing-cta">
-          <p>Turn one invoice into a payment schedule both sides can verify.</p>
-          <h2>Ready when the work is.</h2>
+        <section className="home-section arc-section">
           <div>
-            <Link className="button button-accent" href="/invoices/new">
-              Create an invoice <ArrowIcon />
-            </Link>
-            <Link className="button button-inverse" href="/docs">
-              Read the protocol guide
-            </Link>
+            <span>Why Arc</span>
+            <h2>USDC payments with USDC-denominated transaction costs.</h2>
           </div>
+          <p>
+            Duelet uses Arc mainnet and official USDC. Invoice amounts use the
+            token’s six-decimal accounting, while Arc handles network fees
+            through its native USDC interface. The app keeps those units
+            separate and visible.
+          </p>
+          <p className="disclosure">
+            Duelet is unaudited software. Circle can pause or block USDC
+            transfers. The current public application is an explicit preview.
+          </p>
+        </section>
+
+        <section className="home-final-cta">
+          <div>
+            <span>One invoice. One schedule. One clear record.</span>
+            <h2>Make the payment match the work.</h2>
+          </div>
+          <Link className="button button-accent" href="/invoices/new">
+            Create payment <ArrowIcon />
+          </Link>
         </section>
       </LandingMotion>
     </PageShell>

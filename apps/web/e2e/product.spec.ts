@@ -17,11 +17,13 @@ async function captureEvidence(
 async function installInjectedWallet(
   page: import('@playwright/test').Page,
   initialChainId = 5042,
+  rejectConnection = false,
 ) {
   await page.addInitScript(
-    ({ account, chain }) => {
+    ({ account, chain, reject }) => {
       const listeners = new Map<string, Set<(...args: unknown[]) => void>>();
       let chainId = chain;
+      let selectedAccount = account;
       const emit = (event: string, ...args: unknown[]) =>
         listeners.get(event)?.forEach((listener) => listener(...args));
       const provider = {
@@ -35,8 +37,21 @@ async function installInjectedWallet(
         }) => {
           if (method === 'eth_chainId') return `0x${chainId.toString(16)}`;
           if (method === 'net_version') return chainId.toString();
-          if (method === 'eth_accounts' || method === 'eth_requestAccounts')
-            return [account];
+          if (method === 'eth_accounts') {
+            return localStorage.getItem('duelet-test-wallet-authorized') ===
+              'yes'
+              ? [selectedAccount]
+              : [];
+          }
+          if (method === 'eth_requestAccounts') {
+            if (reject) {
+              throw Object.assign(new Error('User rejected the request.'), {
+                code: 4001,
+              });
+            }
+            localStorage.setItem('duelet-test-wallet-authorized', 'yes');
+            return [selectedAccount];
+          }
           if (method === 'eth_getBalance') return '0xde0b6b3a7640000';
           if (method === 'wallet_switchEthereumChain') {
             const requested = params?.[0] as { chainId?: string } | undefined;
@@ -66,9 +81,66 @@ async function installInjectedWallet(
           chainId = nextChain;
           emit('chainChanged', `0x${chainId.toString(16)}`);
         },
+        __dueletSetAccount: (nextAccount: string) => {
+          selectedAccount = nextAccount;
+          emit('accountsChanged', [selectedAccount]);
+        },
       });
     },
-    { account: TEST_ACCOUNT, chain: initialChainId },
+    { account: TEST_ACCOUNT, chain: initialChainId, reject: rejectConnection },
+  );
+}
+
+async function installEip6963Wallets(page: import('@playwright/test').Page) {
+  await page.addInitScript(
+    ({ account }) => {
+      const makeProvider = (flags: Record<string, boolean>) => ({
+        ...flags,
+        request: async ({ method }: { method: string }) => {
+          if (method === 'eth_chainId') return '0x13b2';
+          if (method === 'net_version') return '5042';
+          if (method === 'eth_accounts') return [];
+          if (method === 'eth_requestAccounts') return [account];
+          if (method === 'eth_getBalance') return '0xde0b6b3a7640000';
+          if (method === 'wallet_getCapabilities') return {};
+          return null;
+        },
+        on: () => undefined,
+        removeListener: () => undefined,
+      });
+      const providers = [
+        {
+          info: {
+            uuid: '00000000-0000-4000-8000-000000000001',
+            name: 'MetaMask',
+            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>',
+            rdns: 'io.metamask',
+          },
+          provider: makeProvider({ isMetaMask: true }),
+        },
+        {
+          info: {
+            uuid: '00000000-0000-4000-8000-000000000002',
+            name: 'Rabby Wallet',
+            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>',
+            rdns: 'io.rabby',
+          },
+          provider: makeProvider({ isRabby: true }),
+        },
+      ];
+      Object.defineProperty(window, 'ethereum', {
+        configurable: true,
+        value: providers[0].provider,
+      });
+      const announce = () =>
+        providers.forEach((detail) =>
+          window.dispatchEvent(
+            new CustomEvent('eip6963:announceProvider', { detail }),
+          ),
+        );
+      window.addEventListener('eip6963:requestProvider', announce);
+    },
+    { account: TEST_ACCOUNT },
   );
 }
 
@@ -81,10 +153,10 @@ test('landing page explains the real mechanism and preview status', async ({
   ).toBeVisible();
   await expect(page.getByText('Preview mode', { exact: true })).toBeVisible();
   await expect(
-    page.getByText(/Claims are triggered transactions/),
+    page.getByText(/Earned USDC becomes available over time/),
   ).toBeVisible();
   await expect(
-    page.getByRole('link', { name: /Create an invoice/ }).first(),
+    page.getByRole('link', { name: /Create payment/ }).first(),
   ).toBeVisible();
 });
 
@@ -93,12 +165,12 @@ test('creation flow validates inputs and blocks writes before deployment', async
 }) => {
   await page.goto('/invoices/new');
   await expect(
-    page.getByRole('heading', { name: 'Create invoice' }),
+    page.getByRole('heading', { name: 'Compose payment' }),
   ).toBeVisible();
   await expect(
     page.getByRole('button', { name: /Approve exact amount/ }),
   ).toBeDisabled();
-  await page.getByLabel('Payee wallet address').fill('not-an-address');
+  await page.getByLabel('Recipient wallet address').fill('not-an-address');
   await expect(page.getByText('Enter a valid payee address.')).toBeVisible();
   await expect(
     page.getByText(/No transaction is available until/),
@@ -110,19 +182,21 @@ test('illustrative proof reconciles without claiming onchain evidence', async ({
 }) => {
   await page.goto('/proof/preview');
   await expect(
-    page.getByRole('heading', { name: 'Invoice proof' }),
+    page.getByRole('heading', { name: 'Public payment proof' }),
   ).toBeVisible();
   await expect(page.getByText('0.01', { exact: true }).first()).toBeVisible();
   await expect(
     page.getByText(/browser-calculated from the shared golden fixture/),
   ).toBeVisible();
-  await expect(page.getByText('Illustrative data')).toBeVisible();
+  await expect(
+    page.getByText('Illustrative data', { exact: true }),
+  ).toBeVisible();
 });
 
 test('workspace and activity present honest empty states', async ({ page }) => {
   await page.goto('/app');
   await expect(
-    page.getByText('Connect a wallet to find your invoices.'),
+    page.getByText('Connect to see payments tied to your address.'),
   ).toBeVisible();
   await page.goto('/activity');
   await expect(page.getByText('No onchain activity yet')).toBeVisible();
@@ -136,15 +210,72 @@ test('wallet sheet explains connection choices without weakening preview mode', 
   await expect(
     page.getByRole('heading', { name: 'Connect to Duelet' }),
   ).toBeVisible();
+  await expect(page.getByText('No browser wallet detected')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Get MetaMask' })).toBeVisible();
   await expect(
-    page.getByRole('button', { name: /MetaMask or browser wallet/ }),
+    page.getByRole('button', { name: /WalletConnect/ }),
   ).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: /WalletConnect QR/ }),
-  ).toBeDisabled();
-  await expect(page.getByText(/stable adapter targets Wagmi 2/)).toBeVisible();
-  await expect(page.getByText(/writes are disabled/i)).toBeVisible();
+  await expect(page.getByText(/Wagmi|Reown/)).toHaveCount(0);
+  await expect(page.getByText(/payments are disabled/i)).toBeVisible();
   await captureEvidence(page, 'wallet-selection-modal');
+});
+
+test('WalletConnect initializes a genuine responsive session', async ({
+  page,
+}, testInfo) => {
+  await page.goto('/');
+  await page.locator('header .wallet-trigger').click();
+  await page.getByRole('button', { name: /WalletConnect/ }).click();
+  await expect(page.locator('.wallet-dialog')).not.toBeVisible();
+  await expect(page.locator('w3m-modal')).toBeVisible({ timeout: 15_000 });
+  if (testInfo.project.name === 'mobile-chrome') {
+    await expect(page.getByRole('alertdialog')).toBeVisible();
+    await expect(page.getByRole('button', { name: /MetaMask/ })).toBeVisible();
+  } else {
+    await expect(page.locator('wui-qr-code')).toBeVisible({ timeout: 15_000 });
+  }
+  await captureEvidence(page, 'walletconnect-qr');
+});
+
+test('EIP-6963 discovery presents multiple real browser wallets once', async ({
+  page,
+}) => {
+  await installEip6963Wallets(page);
+  await page.goto('/');
+  await page.locator('header .wallet-trigger').click();
+  await expect(page.getByRole('button', { name: /MetaMask/ })).toHaveCount(1);
+  await expect(page.getByRole('button', { name: /Rabby Wallet/ })).toHaveCount(
+    1,
+  );
+  await expect(page.getByText('Browser wallet', { exact: true })).toHaveCount(
+    0,
+  );
+  await captureEvidence(page, 'wallet-multiple-providers');
+});
+
+test('wallet rejection stays disconnected and shows a human message', async ({
+  page,
+}) => {
+  await installInjectedWallet(page, 5042, true);
+  await page.goto('/');
+  await page.locator('header .wallet-trigger').click();
+  await page.getByRole('button', { name: /MetaMask/ }).click();
+  await expect(page.locator('.wallet-error')).toHaveText(
+    'Wallet connection canceled. No account was connected.',
+  );
+  await expect(page.locator('header .wallet-trigger')).toContainText('Connect');
+});
+
+test('wallet dialog closes with Escape and returns focus to its trigger', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const trigger = page.locator('header .wallet-trigger');
+  await trigger.click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await expect(trigger).toBeFocused();
 });
 
 test('injected wallet connects, exposes Arc status, copies, and disconnects', async ({
@@ -153,20 +284,20 @@ test('injected wallet connects, exposes Arc status, copies, and disconnects', as
   await installInjectedWallet(page);
   await page.goto('/app');
   await page.locator('header .wallet-trigger').click();
-  await page
-    .getByRole('button', { name: /MetaMask or browser wallet/ })
-    .click();
+  await page.getByRole('button', { name: /Browser wallet|MetaMask/ }).click();
   await expect(page.locator('header .wallet-trigger')).not.toHaveClass(/wrong/);
   await expect(page.getByText('0x10000…00001').first()).toBeVisible();
   await page.reload({ waitUntil: 'networkidle' });
   await expect(page.getByText('0x10000…00001').first()).toBeVisible();
   await page.locator('header .wallet-trigger').click();
-  await expect(page.getByText('Connected to Arc mainnet')).toBeVisible();
-  await expect(page.getByText(/18-decimal native precision/)).toBeVisible();
+  await expect(
+    page.getByText('MetaMask · Connected to Arc mainnet'),
+  ).toBeVisible();
+  await expect(page.getByText('Available on Arc')).toBeVisible();
   await captureEvidence(page, 'wallet-connected');
   await page.getByRole('button', { name: /Disconnect wallet/ }).click();
   await expect(
-    page.getByText('Connect a wallet to find your invoices.'),
+    page.getByText('Connect to see payments tied to your address.'),
   ).toBeVisible();
 });
 
@@ -176,9 +307,16 @@ test('account and chain changes expose a recoverable wrong-network state', async
   await installInjectedWallet(page);
   await page.goto('/');
   await page.locator('header .wallet-trigger').click();
-  await page
-    .getByRole('button', { name: /MetaMask or browser wallet/ })
-    .click();
+  await page.getByRole('button', { name: /Browser wallet|MetaMask/ }).click();
+  await page.evaluate(() => {
+    const testWindow = window as typeof window & {
+      __dueletSetAccount: (account: string) => void;
+    };
+    testWindow.__dueletSetAccount('0x2000000000000000000000000000000000000002');
+  });
+  await expect(page.locator('header .wallet-trigger')).toContainText(
+    '0x20000…00002',
+  );
   await page.evaluate(() => {
     const testWindow = window as typeof window & {
       __dueletSetChain: (chain: number) => void;
@@ -187,13 +325,15 @@ test('account and chain changes expose a recoverable wrong-network state', async
   });
   await expect(page.locator('header .wallet-trigger')).toHaveClass(/wrong/);
   await page.locator('header .wallet-trigger').click();
-  await expect(page.getByText('Unsupported network')).toBeVisible();
+  await expect(page.getByText('MetaMask · Unsupported network')).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Switch to Arc mainnet' }),
   ).toBeVisible();
   await captureEvidence(page, 'wallet-wrong-network');
   await page.getByRole('button', { name: 'Switch to Arc mainnet' }).click();
-  await expect(page.getByText('Connected to Arc mainnet')).toBeVisible();
+  await expect(
+    page.getByText('MetaMask · Connected to Arc mainnet'),
+  ).toBeVisible();
 });
 
 test('all primary routes navigate without horizontal overflow', async ({
@@ -229,7 +369,9 @@ test('production routes survive hard refresh without inventing deployment data',
     await expect(page.getByText('Preview mode', { exact: true })).toBeVisible();
   }
 
-  await expect(page.getByText('Illustrative data')).toBeVisible();
+  await expect(
+    page.getByText('Illustrative data', { exact: true }),
+  ).toBeVisible();
 });
 
 test('dynamic routes reject malformed invoice IDs', async ({ page }) => {
@@ -268,15 +410,17 @@ test('primary navigation remains available on compact screens', async ({
   });
   await expect(navigation).toBeVisible();
   await expect(
-    navigation.getByRole('link', { name: 'Workspace' }),
+    navigation.getByRole('link', { name: 'Overview' }),
   ).toBeVisible();
   await expect(
-    navigation.getByRole('link', { name: 'Invoices' }),
+    navigation.getByRole('link', { name: 'My invoices' }),
   ).toBeVisible();
   await expect(
     navigation.getByRole('link', { name: 'Activity' }),
   ).toBeVisible();
-  await expect(navigation.getByRole('link', { name: 'Docs' })).toBeVisible();
+  await expect(
+    navigation.getByRole('link', { name: 'Documentation' }),
+  ).toBeVisible();
 });
 
 test('financial forms and controls retain accessible names', async ({
@@ -315,7 +459,7 @@ test('reduced-motion preference disables decorative movement', async ({
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   const duration = await page
-    .locator('.marquee div')
+    .locator('.stream-instrument .progress-track > span')
     .evaluate((element) => getComputedStyle(element).animationDuration);
   expect(Number.parseFloat(duration)).toBeLessThanOrEqual(0.00001);
 });

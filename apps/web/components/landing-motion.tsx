@@ -12,37 +12,28 @@ export function LandingMotion({ children }: { children: ReactNode }) {
   useGSAP(
     () => {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      gsap.from('.hero-copy > *', {
+      gsap.from('.home-hero-copy > *', {
         y: 32,
+        opacity: 0,
         duration: 0.8,
         stagger: 0.08,
         ease: 'power3.out',
       });
-      gsap.from('.stream-demo', {
+      gsap.from('.stream-instrument', {
         y: 48,
         scale: 0.96,
+        opacity: 0,
         duration: 1,
         delay: 0.18,
         ease: 'power3.out',
       });
-      gsap.utils
-        .toArray<HTMLElement>('.mechanism-grid > article')
-        .forEach((card, index) => {
-          gsap.from(card, {
-            y: 64 + index * 6,
-            scale: 0.97,
-            scrollTrigger: {
-              trigger: card,
-              start: 'top 88%',
-              end: 'top 58%',
-              scrub: 0.7,
-            },
-          });
+      gsap.utils.toArray<HTMLElement>('.home-section').forEach((section) => {
+        gsap.from(section, {
+          y: 36,
+          opacity: 0,
+          duration: 0.7,
+          scrollTrigger: { trigger: section, start: 'top 88%' },
         });
-      gsap.from('.trust-list article', {
-        y: 54,
-        stagger: 0.12,
-        scrollTrigger: { trigger: '.trust-section', start: 'top 72%' },
       });
     },
     { scope: root },

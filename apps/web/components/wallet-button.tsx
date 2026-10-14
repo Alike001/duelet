@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { formatUnits } from 'viem';
 import {
+  type Connector,
   useBalance,
   useConnect,
   useConnection,
@@ -11,11 +13,15 @@ import {
   useSwitchChain,
 } from 'wagmi';
 
-import { ARC_CHAIN_ID } from '@/lib/chain';
+import { addressUrl, ARC_CHAIN_ID } from '@/lib/chain';
 import { shortHash } from '@/lib/finance';
-import { reownProjectId } from '@/lib/wagmi';
+import {
+  walletDisplayName,
+  walletErrorMessage,
+  walletIdentityKey,
+} from '@/lib/wallet';
 
-import { CopyIcon, WalletIcon } from './icons';
+import { CopyIcon, ExternalIcon, WalletIcon } from './icons';
 
 export function WalletButton() {
   const connection = useConnection();
@@ -25,12 +31,19 @@ export function WalletButton() {
   const [view, setView] = useState<'connect' | 'account'>('connect');
   const [message, setMessage] = useState('');
   const [copied, setCopied] = useState(false);
-  const { mutate: connect, isPending, error: connectionError } = useConnect();
+  const [checkingWallets, setCheckingWallets] = useState(false);
+  const [availableWallets, setAvailableWallets] = useState<DetectedWallet[]>(
+    [],
+  );
+  const [pendingConnectorUid, setPendingConnectorUid] = useState<string>();
+  const [connectedWalletName, setConnectedWalletName] =
+    useState('Browser wallet');
+  const { mutate: connect, isPending, reset: resetConnection } = useConnect();
   const { mutate: disconnect } = useDisconnect();
   const {
     mutate: switchChain,
     isPending: switching,
-    error: switchError,
+    reset: resetSwitch,
   } = useSwitchChain();
   const gasBalance = useBalance({
     address: connection.address,
@@ -43,35 +56,90 @@ export function WalletButton() {
     setView(connection.status === 'connected' ? 'account' : 'connect');
   }, [connection.status]);
 
+  useEffect(() => {
+    if (connection.status !== 'connected' || !connection.connector) return;
+    void connection.connector
+      .getProvider()
+      .then((provider) =>
+        setConnectedWalletName(
+          walletDisplayName(connection.connector?.name ?? 'Injected', provider),
+        ),
+      )
+      .catch(() =>
+        setConnectedWalletName(
+          connection.connector?.name === 'Injected'
+            ? 'Browser wallet'
+            : (connection.connector?.name ?? 'Browser wallet'),
+        ),
+      );
+  }, [connection.connector, connection.status]);
+
+  const discoverWallets = useCallback(async () => {
+    setCheckingWallets(true);
+    const available = await Promise.all(
+      connectors.map(async (connector) => {
+        const provider = await connector.getProvider().catch(() => undefined);
+        if (!provider) return undefined;
+        return {
+          connector,
+          icon: connector.icon,
+          name: walletDisplayName(connector.name, provider),
+        } satisfies DetectedWallet;
+      }),
+    );
+    const unique = new Map<string, DetectedWallet>();
+    for (const wallet of available) {
+      if (!wallet) continue;
+      const identity = walletIdentityKey(wallet.name, wallet.connector.rdns);
+      if (!unique.has(identity)) unique.set(identity, wallet);
+    }
+    setAvailableWallets(
+      [...unique.values()].sort((left, right) => {
+        if (left.name === 'MetaMask') return -1;
+        if (right.name === 'MetaMask') return 1;
+        return left.name.localeCompare(right.name);
+      }),
+    );
+    setCheckingWallets(false);
+  }, [connectors]);
+
+  useEffect(() => {
+    if (dialog.current?.open && view === 'connect') void discoverWallets();
+  }, [discoverWallets, view]);
+
   function openWallet(nextView: 'connect' | 'account') {
     setView(nextView);
     setMessage('');
+    resetConnection();
+    resetSwitch();
     dialog.current?.showModal();
+    if (nextView === 'connect') void discoverWallets();
   }
 
   function closeWallet() {
     dialog.current?.close();
   }
 
-  function connectInjected() {
-    const connector = connectors.find((item) => item.id === 'injected');
-    if (!connector) {
-      setMessage(
-        'No browser wallet was detected. Install MetaMask or open Duelet inside a compatible wallet browser.',
-      );
-      return;
-    }
+  function connectWallet(connector: Connector) {
     setMessage('');
+    setPendingConnectorUid(connector.uid);
+    const usesQrModal = connector.type === 'walletConnect';
+    if (usesQrModal) closeWallet();
     connect(
       { connector, chainId: ARC_CHAIN_ID },
       {
-        onSuccess: () => closeWallet(),
-        onError: (error) =>
-          setMessage(
-            error.message.includes('rejected')
-              ? 'Connection was rejected in the wallet.'
-              : `Connection failed: ${error.message}`,
-          ),
+        onSuccess: () => {
+          setPendingConnectorUid(undefined);
+          closeWallet();
+        },
+        onError: (error) => {
+          setPendingConnectorUid(undefined);
+          if (usesQrModal) {
+            setView('connect');
+            dialog.current?.showModal();
+          }
+          setMessage(walletErrorMessage(error));
+        },
       },
     );
   }
@@ -85,6 +153,9 @@ export function WalletButton() {
 
   const isConnected = connection.status === 'connected';
   const wrongNetwork = isConnected && connection.chainId !== ARC_CHAIN_ID;
+  const browserWalletAvailable = availableWallets.some(
+    ({ connector }) => connector.type !== 'walletConnect',
+  );
   const formattedGas = gasBalance.data
     ? formatNativeBalance(gasBalance.data.value)
     : '—';
@@ -145,46 +216,81 @@ export function WalletButton() {
           {view === 'connect' ? (
             <>
               <p className="wallet-intro">
-                Connect only to inspect your role or prepare a transaction.
-                Public invoices and proof pages never require a wallet.
+                Choose a browser wallet to view your invoices or prepare a
+                payment. Public proof pages do not require a connection.
               </p>
               <div className="wallet-options">
-                <button
-                  type="button"
-                  onClick={connectInjected}
-                  disabled={isPending}
-                >
-                  <span className="wallet-option-mark">M</span>
-                  <span>
-                    <strong>
-                      {isPending
-                        ? 'Check your wallet'
-                        : 'MetaMask or browser wallet'}
-                    </strong>
-                    <small>Extension or compatible mobile wallet browser</small>
-                  </span>
-                  <b>→</b>
-                </button>
-                <button
-                  type="button"
-                  disabled
-                  aria-describedby="walletconnect-note"
-                >
-                  <span className="wallet-option-mark qr">⌁</span>
-                  <span>
-                    <strong>WalletConnect QR</strong>
-                    <small>
-                      {reownProjectId
-                        ? 'Project ID found; adapter remains intentionally disabled'
-                        : 'Available after a Reown project ID is configured'}
-                    </small>
-                  </span>
-                  <b>Pending</b>
-                </button>
+                {checkingWallets ? (
+                  <div className="wallet-detection">Checking this browser…</div>
+                ) : (
+                  <>
+                    {availableWallets.map(({ connector, icon, name }) => (
+                      <button
+                        type="button"
+                        onClick={() => connectWallet(connector)}
+                        disabled={isPending}
+                        key={connector.uid}
+                      >
+                        <span className="wallet-option-mark" aria-hidden="true">
+                          {icon ? (
+                            <Image
+                              alt=""
+                              height={40}
+                              src={icon}
+                              unoptimized
+                              width={40}
+                            />
+                          ) : (
+                            name.slice(0, 1).toUpperCase()
+                          )}
+                        </span>
+                        <span>
+                          <strong>
+                            {isPending && pendingConnectorUid === connector.uid
+                              ? 'Check your wallet'
+                              : name}
+                          </strong>
+                          <small>
+                            {isPending && pendingConnectorUid === connector.uid
+                              ? 'Approve or cancel the request there'
+                              : connector.type === 'walletConnect'
+                                ? 'Scan a QR code or use a mobile wallet'
+                                : 'Detected in this browser'}
+                          </small>
+                        </span>
+                        <b>→</b>
+                      </button>
+                    ))}
+                    {!browserWalletAvailable && (
+                      <div className="no-wallet-state">
+                        <strong>No browser wallet detected</strong>
+                        <p>
+                          Install MetaMask, use WalletConnect, or open Duelet
+                          inside your mobile wallet&apos;s browser.
+                        </p>
+                        <div className="no-wallet-actions">
+                          <a
+                            href="https://metamask.io/download/"
+                            rel="noreferrer"
+                            target="_blank"
+                          >
+                            Get MetaMask
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => void discoverWallets()}
+                          >
+                            Check again
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-              <p className="wallet-note" id="walletconnect-note">
-                Duelet keeps its verified Wagmi 3 stack. Reown AppKit's stable
-                adapter targets Wagmi 2; the Wagmi 3 adapter remains prerelease.
+              <p className="wallet-note">
+                Duelet only lists connection methods that are available now.
+                Public invoices and proof pages never require a wallet.
               </p>
             </>
           ) : (
@@ -196,8 +302,8 @@ export function WalletButton() {
                 <div>
                   <span>
                     {wrongNetwork
-                      ? 'Unsupported network'
-                      : 'Connected to Arc mainnet'}
+                      ? `${connectedWalletName} · Unsupported network`
+                      : `${connectedWalletName} · Connected to Arc mainnet`}
                   </span>
                   <strong>{shortHash(connection.address ?? '', 8)}</strong>
                 </div>
@@ -213,13 +319,23 @@ export function WalletButton() {
                 </span>
               </button>
               <div className="wallet-balance">
-                <span>Native gas balance</span>
+                <span>Available on Arc</span>
                 <strong>{formattedGas} USDC</strong>
                 <small>
-                  18-decimal native precision · separate from six-decimal
-                  invoice accounting
+                  Used for payments and Arc transaction fees.{' '}
+                  <a href="/docs#what-arc-contributes">How Arc USDC works</a>
                 </small>
               </div>
+              {connection.address && (
+                <a
+                  className="wallet-explorer-link"
+                  href={addressUrl(connection.address)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View account on Arc Explorer <ExternalIcon />
+                </a>
+              )}
               {wrongNetwork && (
                 <button
                   className="button button-accent"
@@ -230,7 +346,7 @@ export function WalletButton() {
                       { chainId: ARC_CHAIN_ID },
                       {
                         onError: (error) =>
-                          setMessage(`Network switch failed: ${error.message}`),
+                          setMessage(walletErrorMessage(error, 'switch')),
                       },
                     )
                   }
@@ -251,9 +367,9 @@ export function WalletButton() {
             </div>
           )}
 
-          {(message || connectionError || switchError) && (
+          {message && (
             <p className="wallet-error" role="alert">
-              {message || connectionError?.message || switchError?.message}
+              {message}
             </p>
           )}
           <div className="wallet-safety">
@@ -267,6 +383,12 @@ export function WalletButton() {
     </div>
   );
 }
+
+type DetectedWallet = {
+  connector: Connector;
+  icon?: string;
+  name: string;
+};
 
 function formatNativeBalance(value: bigint) {
   const [whole, fraction = ''] = formatUnits(value, 18).split('.');

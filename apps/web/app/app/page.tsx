@@ -11,114 +11,134 @@ import { deployment } from '@/lib/chain';
 
 export default function WorkspacePage() {
   const connection = useConnection();
+
   return (
     <PageShell compact>
-      <div className="page-heading">
+      <div className="workspace-header">
         <div>
-          <p className="eyebrow">Payment workspace</p>
-          <h1>Your streams</h1>
+          <p className="page-kicker">Overview</p>
+          <h1>Payment workspace</h1>
+          <p>Fund invoices, track scheduled payments, and claim earned USDC.</p>
         </div>
         <Link className="button button-accent" href="/invoices/new">
-          Create invoice <ArrowIcon />
+          Create payment <ArrowIcon />
         </Link>
       </div>
+
+      <nav className="workspace-tabs" aria-label="Workspace sections">
+        <Link className="active" href="/app">
+          Overview
+        </Link>
+        <Link href="/invoices">My invoices</Link>
+        <Link href="/invoices">Payments received</Link>
+        <Link href="/activity">Activity</Link>
+      </nav>
+
       {connection.status !== 'connected' ? (
-        <div className="workspace-disconnected">
-          <section className="wallet-gate">
-            <p className="eyebrow">Your address is the account</p>
-            <div className="wallet-visual">
+        <section className="connect-onboarding">
+          <div className="connect-onboarding-copy">
+            <span className="onboarding-icon">
               <WalletIcon />
-            </div>
-            <h2>Connect a wallet to find your invoices.</h2>
+            </span>
+            <p className="page-kicker">Your wallet is your account</p>
+            <h2>Connect to see payments tied to your address.</h2>
             <p>
-              Duelet searches confirmed contract events for streams where this
-              address is the payer or payee. No account or email is required.
+              Duelet reads confirmed Arc events to find invoices you funded and
+              payments sent to you. No email account or profile is required.
             </p>
             <WalletButton />
-          </section>
-          <aside className="workspace-role-guide">
-            <div>
-              <span>As payer</span>
-              <strong>Create · fund · cancel</strong>
-              <p>
-                Lock the complete payment, monitor vesting, and recover only the
-                portion the recipient has not earned.
-              </p>
+          </div>
+          <div className="onboarding-preview">
+            <div className="preview-toolbar">
+              <span>Your overview</span>
+              <i>Preview</i>
             </div>
-            <div>
-              <span>As recipient</span>
-              <strong>Inspect · claim · prove</strong>
-              <p>
-                Watch entitlement vest and receive every earned unit at the
-                immutable payee address.
-              </p>
+            <div className="preview-balance">
+              <span>Available to claim</span>
+              <strong>—</strong>
+              <small>USDC</small>
             </div>
-            <small>
-              Public proof pages remain available without connecting a wallet.
-            </small>
-          </aside>
-        </div>
+            <div className="preview-rows">
+              <div>
+                <span>Invoices funded</span>
+                <strong>Connect to view</strong>
+              </div>
+              <div>
+                <span>Payments received</span>
+                <strong>Connect to view</strong>
+              </div>
+              <div>
+                <span>Confirmed activity</span>
+                <strong>Connect to view</strong>
+              </div>
+            </div>
+            <p>No balances or invoices are assumed before connection.</p>
+          </div>
+        </section>
       ) : (
-        <>
-          <section className="workspace-summary">
-            <article>
-              <span>Created by me</span>
+        <div className="workspace-connected">
+          <section className="workspace-balances">
+            <article className="primary-balance">
+              <span>Available to claim</span>
               <strong>—</strong>
-              <p>
-                {deployment.mode === 'preview'
-                  ? 'Unavailable before deployment'
-                  : 'Loading from confirmed events'}
+              <small>USDC · calculated from confirmed contract state</small>
+            </article>
+            <dl>
+              <div>
+                <dt>Invoices funded</dt>
+                <dd>—</dd>
+              </div>
+              <div>
+                <dt>Payments received</dt>
+                <dd>—</dd>
+              </div>
+              <div>
+                <dt>Network</dt>
+                <dd>Arc mainnet</dd>
+              </div>
+            </dl>
+            {deployment.mode === 'preview' && (
+              <p className="workspace-data-note">
+                No contract is deployed, so Duelet will not invent positions for
+                this wallet.
               </p>
-            </article>
-            <article>
-              <span>Payable to me</span>
-              <strong>—</strong>
-              <p>
-                {deployment.mode === 'preview'
-                  ? 'No fabricated positions'
-                  : 'Loading from confirmed events'}
-              </p>
-            </article>
-            <article className="accent">
-              <span>Claimable now</span>
-              <strong>—</strong>
-              <p>Calculated from latest onchain state</p>
-            </article>
+            )}
           </section>
-          <div className="workspace-grid">
-            <section className="panel">
-              <div className="panel-head">
+
+          <div className="workspace-content-grid">
+            <section className="workspace-activity">
+              <div className="section-row-head">
                 <div>
-                  <h2>Recent contract activity</h2>
-                  <p className="panel-subtitle">Confirmed events only</p>
+                  <h2>Recent activity</h2>
+                  <p>Confirmed Arc events only</p>
                 </div>
                 <Link href="/activity">View all</Link>
               </div>
               <ActivityFeed limit={5} />
             </section>
-            <aside className="panel quick-panel">
-              <h2>Start with an invoice</h2>
-              <p>
-                Set immutable terms, approve the exact amount, and fund escrow
-                in one confirmed contract transaction.
-              </p>
+            <aside className="workspace-next-step">
+              <span>New payment</span>
+              <h2>Fund an invoice in two wallet steps.</h2>
               <ol>
                 <li>
-                  <span>1</span>Enter payment terms
+                  <i>1</i>
+                  <span>
+                    <strong>Approve</strong>Exactly the invoice amount
+                  </span>
                 </li>
                 <li>
-                  <span>2</span>Review approval
-                </li>
-                <li>
-                  <span>3</span>Fund the stream
+                  <i>2</i>
+                  <span>
+                    <strong>Fund</strong>Create the schedule and escrow
+                  </span>
                 </li>
               </ol>
-              <Link className="button button-dark" href="/invoices/new">
-                Open creation flow
+              <Link className="button button-secondary" href="/invoices/new">
+                Compose payment
               </Link>
             </aside>
           </div>
-        </>
+        </div>
       )}
     </PageShell>
   );

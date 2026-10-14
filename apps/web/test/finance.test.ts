@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   formatUsdc,
   hasExactApproval,
+  illustrativeInvoiceAt,
+  nextIllustrativeElapsed,
   parseUsdc,
   reconcile,
   vestedAt,
@@ -61,5 +63,35 @@ describe('Duelet financial presentation', () => {
     expect(hasExactApproval(9_999n, 10_000n)).toBe(false);
     expect(hasExactApproval(10_001n, 10_000n)).toBe(false);
     expect(hasExactApproval(undefined, 10_000n)).toBe(false);
+  });
+
+  it('keeps every animated illustration frame financially possible', () => {
+    for (let elapsed = 0n; elapsed <= 180n; elapsed += 1n) {
+      const frame = illustrativeInvoiceAt(elapsed);
+      const accounting = reconcile(frame, elapsed);
+
+      expect(frame.withdrawnAmount).toBeLessThanOrEqual(accounting.vested);
+      expect(accounting.claimable).toBeGreaterThanOrEqual(0n);
+      expect(
+        frame.withdrawnAmount + frame.refundedAmount + accounting.liability,
+      ).toBe(frame.totalAmount);
+      expect(accounting.vested).toBe(
+        (frame.totalAmount * elapsed) / (frame.endTime - frame.startTime),
+      );
+    }
+
+    expect(illustrativeInvoiceAt(0n).withdrawnAmount).toBe(0n);
+    expect(illustrativeInvoiceAt(17n).withdrawnAmount).toBe(0n);
+    expect(illustrativeInvoiceAt(18n).withdrawnAmount).toBe(1_000n);
+    expect(reconcile(illustrativeInvoiceAt(0n), 0n).claimable).toBe(0n);
+
+    const resetElapsed = nextIllustrativeElapsed(180n);
+    const resetFrame = illustrativeInvoiceAt(resetElapsed);
+    const resetAccounting = reconcile(resetFrame, resetElapsed);
+    expect(resetElapsed).toBe(0n);
+    expect(resetFrame.withdrawnAmount).toBeLessThanOrEqual(
+      resetAccounting.vested,
+    );
+    expect(resetAccounting.claimable).toBeGreaterThanOrEqual(0n);
   });
 });

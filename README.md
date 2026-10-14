@@ -71,11 +71,10 @@ contract accounting separate.
 - `fixtures` — deterministic Solidity/TypeScript financial vectors.
 - `docs` — product, threat, release, deployment and grant evidence.
 
-The Phase 4.1 wallet decision is documented in
-[`docs/WALLET_INTEGRATION.md`](docs/WALLET_INTEGRATION.md). Duelet currently
-uses its verified Wagmi 3 injected-wallet path; WalletConnect QR remains
-disabled pending a real Reown project ID, a stable compatible adapter, and a
-license decision.
+The wallet architecture is documented in
+[`docs/WALLET_INTEGRATION.md`](docs/WALLET_INTEGRATION.md). Duelet supports
+MetaMask and other EIP-6963 browser wallets plus WalletConnect QR/mobile
+sessions through the official Wagmi 3 connector.
 
 ## Local development
 
@@ -150,3 +149,7 @@ licenses and notices; they are not relicensed by Duelet. Dependency declarations
 and applicable notices are recorded in
 [`docs/DEPENDENCY_LICENSES.md`](docs/DEPENDENCY_LICENSES.md) and
 [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md).
+
+WalletConnect components are provided under the
+[WalletConnect Community License](docs/licenses/WALLETCONNECT_COMMUNITY_LICENSE.md),
+not MIT. Portions © 2025 Reown, Inc. All Rights Reserved.

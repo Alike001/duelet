@@ -17,7 +17,7 @@ export function ModeBanner() {
       </strong>
       <span>
         {deployment.mode === 'preview'
-          ? 'No Duelet contract is configured or deployed. Illustrations are labeled; writes are disabled.'
+          ? 'Illustrative data only. No contract is deployed and payments are disabled.'
           : verification.reason}
       </span>
     </div>

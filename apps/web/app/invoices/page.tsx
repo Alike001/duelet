@@ -26,15 +26,15 @@ export default function InvoicesPage() {
     <PageShell compact>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">Invoice registry</p>
-          <h1>Invoices</h1>
+          <p className="page-kicker">Payment records</p>
+          <h1>My invoices</h1>
           <p>
             Discovered from confirmed Duelet events, then refreshed against
             current contract state.
           </p>
         </div>
         <Link className="button button-accent" href="/invoices/new">
-          Create invoice <ArrowIcon />
+          Create payment <ArrowIcon />
         </Link>
       </div>
       <div className="filter-bar" role="group" aria-label="Invoice filters">

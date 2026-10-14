@@ -1,78 +1,77 @@
 # Duelet wallet integration decision
 
-Status: Phase 4.1 decision, 2026-10-14. No wallet transaction was signed or
+Status: Final wallet upgrade, 2026-10-15. No wallet transaction was signed or
 broadcast during this work.
 
 ## Decision
 
-Duelet keeps its existing Wagmi 3 connection and transaction stack for this
-release. It now presents a purpose-built wallet sheet for injected EIP-1193
-wallets, including MetaMask and compatible mobile wallet browsers. Reown AppKit
-and WalletConnect QR are not enabled yet.
+Duelet keeps its verified Wagmi `3.7.7`, Viem `2.57.6`, and TanStack Query
+`5.104.2` connection and transaction stack. Its wallet sheet supports injected
+EIP-1193 wallets and uses Wagmi's EIP-6963 discovery for named providers such as
+MetaMask and Rabby. WalletConnect QR/mobile sessions are enabled through
+Wagmi's official connector; Duelet does not use the AppKit React adapter.
 
-This is deliberate:
+Wagmi 3 provides an official `walletConnect` connector, so AppKit is not needed
+for QR connections. The connector uses the owner-provided public Reown project
+ID through `NEXT_PUBLIC_REOWN_PROJECT_ID` and the pinned
+`@walletconnect/ethereum-provider` `2.26.0` peer dependency.
 
-- Duelet uses Wagmi `3.7.7`, Viem `2.57.6`, and TanStack Query `5.104.2`.
-- The current stable `@reown/appkit` release is `1.8.24`, and Reown's stable
-  installation documentation currently specifies Wagmi 2.x. Reown publishes
-  `@reown/appkit-adapter-wagmi@2.0.0-wagmi-3.0` with peer ranges of Wagmi
-  `>=3.0.0`, Viem `>=2.55.13`, `@wagmi/core >=3.0.0`, and
-  `@wagmi/connectors >=8.0.0`, but it is a prerelease rather than the stable
-  integration path.
-- WalletConnect needs a real Reown project ID. None is stored in the repository
-  and Duelet must not invent one.
-- The current `@walletconnect/ethereum-provider` package uses the WalletConnect
-  Community License Agreement, not MIT. Its terms and notices need an explicit
-  project decision before it is added to Duelet's dependency inventory.
-- Downgrading Wagmi would replace a verified transaction stack immediately
-  before financial release. A prerelease adapter would create the same risk in
-  a different direction.
+The inspected current provider release, `2.26.0`, uses the WalletConnect
+Community License Agreement dated 20 August 2025 rather than MIT. Downloading,
+installing, integrating, or using it constitutes acceptance. Distribution
+requires the Reown copyright notice, a copy of that license, and applicable
+branding; use must connect to Reown's network; commercial terms apply above the
+stated RPC/MAU thresholds; and the agreement includes binding arbitration. The
+project owner explicitly accepted those terms before installation. The required
+notice appears in the root README and an exact license copy is stored at
+`docs/licenses/WALLETCONNECT_COMMUNITY_LICENSE.md`.
 
-The optional public environment variable is reserved now:
+The optional public environment variable remains reserved:
 
 ```text
-NEXT_PUBLIC_REOWN_PROJECT_ID=
+NEXT_PUBLIC_REOWN_PROJECT_ID=<public Reown project ID>
 ```
 
-A project ID is public client configuration, not a wallet secret. Its presence
-alone does not enable QR connections; the compatible adapter must also pass the
-same account, chain, simulation, deployment-identity, and receipt tests as the
-current flow.
+A project ID is public client configuration, not a wallet secret. Missing or
+malformed values omit the WalletConnect connector rather than exposing a broken
+choice.
 
 ## Current wallet experience
 
-- Branded connect button and accessible native dialog.
-- Injected wallet discovery with clear no-wallet and rejection messages.
-- Connected address, copy action, disconnect, and reconnection through Wagmi.
-- Arc mainnet status and a `Switch to Arc mainnet` action.
-- Native Arc gas balance labeled separately from six-decimal ERC-20 USDC
-  accounting.
+- Accessible native dialog with Escape dismissal and trigger-focus restoration.
+- EIP-6963 discovery with provider names/icons where announced, a
+  MetaMask-compatible legacy injected fallback, and duplicate suppression.
+- WalletConnect's hosted QR/mobile chooser, session persistence, and explicit
+  disconnect through the same Wagmi provider tree.
+- Clear no-wallet installation/mobile guidance and human-readable rejection
+  messages.
+- Connected address, copy action, intentional disconnect, and refresh
+  reconnection through Wagmi.
+- Arc mainnet status and a `Switch to Arc mainnet` recovery action.
+- One Arc-native USDC balance display. It is not duplicated as a second ERC-20
+  balance; six-decimal invoice accounting remains separate in payment views.
 - Public invoices and proof pages remain readable without connecting.
 - Preview mode and deployment-identity checks continue to disable writes.
 
-## AppKit activation gate
+## WalletConnect release properties
 
-Reconsider AppKit only after all of the following are true:
-
-1. A real Reown project ID is available.
-2. Reown documents a stable Wagmi 3 adapter, or the prerelease is explicitly
-   accepted after a pinned compatibility test.
-3. WalletConnect dependency terms and redistribution notices are accepted and
-   recorded in `docs/DEPENDENCY_LICENSES.md`.
-4. One provider context replaces—not duplicates—the existing provider tree.
-5. Desktop QR, mobile deep-link, reconnect, account-change, chain-change,
-   rejection, and preview-lock browser tests pass.
-6. Financial writes remain gated by chain `5042`, expected runtime hash,
-   immutable Arc USDC, simulation, and confirmed receipts.
+- The connector is compiled only for a syntactically valid project ID.
+- Its metadata identifies Duelet and `https://duelet.vercel.app`.
+- Arc mainnet (`eip155:5042`) is the only configured chain.
+- The Duelet dialog closes before the hosted QR modal opens, preventing native
+  top-layer conflicts.
+- WalletConnect never bypasses chain `5042`, runtime hash, immutable USDC,
+  simulation, preview-mode, or receipt-confirmation guards.
+- Production domain allowlisting remains controlled in the Reown project
+  dashboard; a QR initialization test verifies the current project accepts the
+  configured application.
 
 ## Sources inspected
 
-- Reown AppKit Next installation:
-  <https://docs.reown.com/appkit/next/core/installation>
-- Reown custom networks:
-  <https://docs.reown.com/appkit/next/core/custom-networks>
-- Reown Arc guide:
-  <https://reown.com/blog/how-to-get-started-with-reown-on-arc-network-using-appkit-cli>
-- Wagmi connector documentation: <https://wagmi.sh/react/api/connectors>
-- Published npm package manifests and license files for the candidate Reown and
-  WalletConnect versions.
+- Wagmi connect-wallet guide: <https://wagmi.sh/react/guides/connect-wallet>
+- Wagmi WalletConnect connector:
+  <https://wagmi.sh/react/api/connectors/walletConnect>
+- Published npm manifests for Wagmi `3.7.7`, `@wagmi/connectors` `8.2.0`, and
+  `@walletconnect/ethereum-provider` `2.26.0`.
+- The `2.26.0` provider archive's `LICENSE.md` (WalletConnect Community License
+  Agreement, release date 20 August 2025).

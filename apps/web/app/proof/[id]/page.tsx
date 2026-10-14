@@ -10,11 +10,11 @@ export default async function ProofPage({
   return (
     <PageShell compact>
       <div className="proof-intro">
-        <p className="eyebrow">Independent verification</p>
-        <h1>Invoice proof</h1>
+        <p className="page-kicker">Payment receipt</p>
+        <h1>Public payment proof</h1>
         <p>
-          Wallet-independent contract state, event evidence, and accounting
-          reconciliation for reviewers.
+          Verify the funding, withdrawals, refunds, and remaining escrow without
+          connecting a wallet.
         </p>
       </div>
       <InvoiceView requestedId={id} proof />

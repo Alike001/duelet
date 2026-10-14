@@ -303,12 +303,12 @@ export function CreateInvoiceForm() {
           <div className="form-section-title">
             <span>1</span>
             <div>
-              <h2>Who gets paid?</h2>
-              <p>The recipient is immutable after funding.</p>
+              <h2>Recipient and amount</h2>
+              <p>Choose who receives the payment and how much to lock.</p>
             </div>
           </div>
           <label>
-            Payee wallet address
+            Recipient wallet address
             <input
               value={payee}
               onChange={(event) => setPayee(event.target.value)}
@@ -338,8 +338,8 @@ export function CreateInvoiceForm() {
           <div className="form-section-title">
             <span>2</span>
             <div>
-              <h2>Set the schedule</h2>
-              <p>Start and end become immutable contract terms.</p>
+              <h2>Payment schedule</h2>
+              <p>Choose when the recipient begins earning the payment.</p>
             </div>
           </div>
           <fieldset>
@@ -385,8 +385,8 @@ export function CreateInvoiceForm() {
           <div className="form-section-title">
             <span>3</span>
             <div>
-              <h2>Commit the reference</h2>
-              <p>Plain invoice documents should remain offchain.</p>
+              <h2>Invoice details</h2>
+              <p>Add a private reference for your own records.</p>
             </div>
           </div>
           <label>
@@ -419,8 +419,8 @@ export function CreateInvoiceForm() {
       <aside className="review-card">
         <div className="review-head">
           <div>
-            <p className="eyebrow">Transaction preview</p>
-            <h2>Review funding</h2>
+            <p className="page-kicker">Review and fund</p>
+            <h2>Payment summary</h2>
           </div>
           <span className="status-pill amber">
             {deployment.mode === 'preview' ? 'Preview only' : 'Not signed'}
@@ -440,7 +440,7 @@ export function CreateInvoiceForm() {
             </dd>
           </div>
           <div>
-            <dt>Payee</dt>
+            <dt>Recipient</dt>
             <dd>
               {isAddress(payee) ? shortHash(payee, 7) : 'Invalid or missing'}
             </dd>
@@ -488,21 +488,24 @@ export function CreateInvoiceForm() {
             </dd>
           </div>
         </dl>
-        <div className="hash-preview">
-          <span>Reference hash</span>
-          <code>{parsed.referenceHash}</code>
-          {parsed.invoiceId && (
-            <>
-              <span>Predicted invoice ID</span>
-              <code>{parsed.invoiceId}</code>
-            </>
-          )}
-        </div>
+        <details className="review-technical">
+          <summary>Technical payment details</summary>
+          <div className="hash-preview">
+            <span>Reference hash</span>
+            <code>{parsed.referenceHash}</code>
+            {parsed.invoiceId && (
+              <>
+                <span>Predicted invoice ID</span>
+                <code>{parsed.invoiceId}</code>
+              </>
+            )}
+          </div>
+        </details>
         <div className="rights-note">
-          <strong>Cancellation terms</strong>
+          <strong>If the payer cancels</strong>
           <p>
-            The payer may cancel before maturity. Unvested funds return
-            immediately; vested payee entitlement cannot be revoked.
+            Future vesting stops and unused escrow returns to the payer. Every
+            amount already earned remains available to the recipient.
           </p>
         </div>
         {parsed.errors.length > 0 && (
@@ -572,7 +575,7 @@ export function CreateInvoiceForm() {
               ? 'Exact allowance available'
               : approvalReceipt.isLoading
                 ? 'Approval submitted…'
-                : 'Approve exact amount'}
+                : '1. Approve exact amount'}
           </button>
           <button
             className="button button-dark"
@@ -592,7 +595,7 @@ export function CreateInvoiceForm() {
             <span>2</span>
             {fundingReceipt.isLoading
               ? 'Funding submitted…'
-              : 'Create and fund invoice'}
+              : '2. Fund payment schedule'}
           </button>
         </div>
         {approval.error && (

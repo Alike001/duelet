@@ -11,6 +11,35 @@ export type InvoiceState = {
   canceledAt: bigint;
 };
 
+export const ILLUSTRATIVE_STREAM_DURATION = 180n;
+export const ILLUSTRATIVE_WITHDRAWAL_TIME = 18n;
+
+export function nextIllustrativeElapsed(elapsed: bigint): bigint {
+  return elapsed >= ILLUSTRATIVE_STREAM_DURATION ? 0n : elapsed + 1n;
+}
+
+/**
+ * Builds one internally valid frame for the animated product illustration.
+ * The first 1,000-unit withdrawal occurs only once 1,000 units have vested.
+ */
+export function illustrativeInvoiceAt(elapsed: bigint): InvoiceState {
+  const boundedElapsed =
+    elapsed < 0n
+      ? 0n
+      : elapsed > ILLUSTRATIVE_STREAM_DURATION
+        ? ILLUSTRATIVE_STREAM_DURATION
+        : elapsed;
+  return {
+    totalAmount: 10_000n,
+    withdrawnAmount:
+      boundedElapsed >= ILLUSTRATIVE_WITHDRAWAL_TIME ? 1_000n : 0n,
+    refundedAmount: 0n,
+    startTime: 0n,
+    endTime: ILLUSTRATIVE_STREAM_DURATION,
+    canceledAt: 0n,
+  };
+}
+
 export function vestedAt(invoice: InvoiceState, timestamp: bigint): bigint {
   let effective = timestamp < invoice.endTime ? timestamp : invoice.endTime;
   if (invoice.canceledAt !== 0n && invoice.canceledAt < effective) {
