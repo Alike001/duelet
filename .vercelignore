@@ -1,11 +1,11 @@
-.git/
-.github/
-.thoughts/
-.tools/
-.vercel/
-artifacts/
-docs/
-scripts/
+/.git/
+/.github/
+/.thoughts/
+/.tools/
+/.vercel/
+/artifacts/
+/docs/
+/scripts/
 
 node_modules/
 **/node_modules/
@@ -19,11 +19,11 @@ node_modules/
 **/playwright-report/
 **/*.tsbuildinfo
 
-contracts/lib/
-contracts/script/
-contracts/src/
-contracts/test/
-fixtures/
+/contracts/lib/
+/contracts/script/
+/contracts/src/
+/contracts/test/
+/fixtures/
 
 .env
 .env.*
