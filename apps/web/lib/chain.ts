@@ -7,6 +7,8 @@ export const ARC_EXPLORER_URL =
   process.env.NEXT_PUBLIC_ARC_EXPLORER_URL ?? 'https://explorer.arc.io';
 export const ARC_USDC_ADDRESS =
   '0x3600000000000000000000000000000000000000' as const;
+export const DUELET_ARC_RUNTIME_CODEHASH =
+  '0xf4ad4b494fd7d609868ae5737d5840ee903b001767718cba4f249309ff84606f' as const;
 
 export const arc = defineChain({
   id: ARC_CHAIN_ID,

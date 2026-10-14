@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { dueletAbi } from '@/lib/abi';
 import { ARC_CHAIN_ID, ARC_USDC_ADDRESS, deployment } from '@/lib/chain';
+import { DUELET_ARC_RUNTIME_CODEHASH } from '@/lib/chain';
+import { deploymentIdentityMatches } from '@/lib/deployment-verification';
 
 describe('Arc and ABI integration', () => {
   it('uses verified Arc configuration and explicit preview mode', () => {
@@ -39,5 +41,20 @@ describe('Arc and ABI integration', () => {
       'FundsWithdrawn',
       'InvoiceCanceled',
     ]);
+  });
+
+  it('locks writes unless bytecode and immutable USDC both match', () => {
+    expect(
+      deploymentIdentityMatches(DUELET_ARC_RUNTIME_CODEHASH, ARC_USDC_ADDRESS),
+    ).toBe(true);
+    expect(
+      deploymentIdentityMatches(`0x${'00'.repeat(32)}`, ARC_USDC_ADDRESS),
+    ).toBe(false);
+    expect(
+      deploymentIdentityMatches(
+        DUELET_ARC_RUNTIME_CODEHASH,
+        '0x0000000000000000000000000000000000000001',
+      ),
+    ).toBe(false);
   });
 });

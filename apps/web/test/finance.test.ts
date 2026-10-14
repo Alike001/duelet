@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatUsdc, parseUsdc, reconcile, vestedAt } from '@/lib/finance';
+import {
+  formatUsdc,
+  hasExactApproval,
+  parseUsdc,
+  reconcile,
+  vestedAt,
+} from '@/lib/finance';
 
 const invoice = {
   totalAmount: 10_000n,
@@ -41,9 +47,19 @@ describe('Duelet financial presentation', () => {
     expect(parseUsdc('0.010000')).toBe(10_000n);
     expect(formatUsdc(10_000n)).toBe('0.01');
     expect(() => parseUsdc('1.0000001')).toThrow(/6 decimals/);
+    expect(formatUsdc(12_345_678_901_234_567_890_123_456n)).toBe(
+      '12,345,678,901,234,567,890.123456',
+    );
   });
 
   it('does not advance across equal timestamps', () => {
     expect(vestedAt(invoice, 1_060n)).toBe(vestedAt(invoice, 1_060n));
+  });
+
+  it('requires an exact allowance and rejects residual authority', () => {
+    expect(hasExactApproval(10_000n, 10_000n)).toBe(true);
+    expect(hasExactApproval(9_999n, 10_000n)).toBe(false);
+    expect(hasExactApproval(10_001n, 10_000n)).toBe(false);
+    expect(hasExactApproval(undefined, 10_000n)).toBe(false);
   });
 });

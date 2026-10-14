@@ -1,6 +1,6 @@
 # Threat model
 
-Status: Phase 1 implementation review; unaudited and not deployed
+Status: implemented and independently re-reviewed in Phase 3; unaudited and not deployed
 
 ## Protected assets and properties
 

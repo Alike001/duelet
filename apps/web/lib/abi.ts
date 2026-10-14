@@ -1,6 +1,13 @@
 export const dueletAbi = [
   {
     type: 'function',
+    name: 'USDC',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'address' }],
+  },
+  {
+    type: 'function',
     name: 'createAndFund',
     stateMutability: 'nonpayable',
     inputs: [

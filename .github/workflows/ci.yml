@@ -38,5 +38,4 @@ jobs:
       - name: Verify real Arc USDC fork lifecycle
         env:
           ARC_MAINNET_RPC_URL: https://rpc.mainnet.arc.io
-          FOUNDRY_PROFILE: arc
-        run: forge test --root contracts --match-contract DueletStreamArcForkTest
+        run: npm run test:arc-fork --workspace @duelet/contracts

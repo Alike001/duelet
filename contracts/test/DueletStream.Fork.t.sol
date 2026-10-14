@@ -6,8 +6,14 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 import {Test} from "forge-std/Test.sol";
 import {DueletStream} from "../src/DueletStream.sol";
 
+interface IImplementationProxy {
+    function implementation() external view returns (address);
+}
+
 contract DueletStreamArcForkTest is Test {
     address private constant ARC_USDC = 0x3600000000000000000000000000000000000000;
+    bytes32 private constant EXPECTED_RUNTIME_CODEHASH =
+        0xf4ad4b494fd7d609868ae5737d5840ee903b001767718cba4f249309ff84606f;
     uint256 private constant TOTAL = 10_000;
 
     bool private forkEnabled;
@@ -20,7 +26,9 @@ contract DueletStreamArcForkTest is Test {
         string memory rpcUrl = vm.envOr("ARC_MAINNET_RPC_URL", string(""));
         if (bytes(rpcUrl).length == 0) return;
 
-        vm.createSelectFork(rpcUrl);
+        uint256 forkBlock = vm.envOr("ARC_MAINNET_FORK_BLOCK", uint256(0));
+        if (forkBlock == 0) vm.createSelectFork(rpcUrl);
+        else vm.createSelectFork(rpcUrl, forkBlock);
         forkEnabled = true;
         payer = makeAddr("arc-fork-payer-local-only");
         payee = makeAddr("arc-fork-payee-local-only");
@@ -32,9 +40,12 @@ contract DueletStreamArcForkTest is Test {
         if (!forkEnabled) return;
         assertEq(block.chainid, 5042);
         assertGt(ARC_USDC.code.length, 0);
+        address implementation = IImplementationProxy(ARC_USDC).implementation();
+        assertGt(implementation.code.length, 0);
         assertEq(IERC20Metadata(ARC_USDC).decimals(), 6);
         assertEq(IERC20Metadata(ARC_USDC).symbol(), "USDC");
         assertEq(address(duelet.USDC()), ARC_USDC);
+        assertEq(address(duelet).codehash, EXPECTED_RUNTIME_CODEHASH);
 
         assertEq(TOTAL, 0.01 * 1e6);
         assertEq(uint256(0.01 ether), uint256(10_000_000_000_000_000));

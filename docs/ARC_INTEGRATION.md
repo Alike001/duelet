@@ -24,8 +24,14 @@ decimal model, and 20 Gwei minimum fee behavior:
 - [EVM differences](https://docs.arc.io/arc/references/evm-differences.md)
 - [Arc Foundry](https://github.com/circlefin/arc-foundry)
 
-A read-only RPC check during Phase 0 returned chain ID `5042`; calling
+A read-only RPC check during Phase 3 returned chain ID `5042`; calling
 `decimals()` and `symbol()` at the configured address returned `6` and `USDC`.
+The release fork is pinned to block `25947829`. At that block the USDC proxy
+code hash was
+`0xc9987bd3af6b26a030951faa7eacc017b68343aeedf3ce5fe68f821c4b93939d`,
+its implementation was `0xC6AD664ac6679F4Ce74e10E91449C93Ec1ae3cA6`, and that
+implementation's code hash was
+`0x237a5899a4c4e1c8b60fe7626371778ce8ef0a554350cd92cdf8ae393f59966f`.
 No transaction was signed or broadcast.
 
 ## USDC accounting model
@@ -84,10 +90,18 @@ precompiles. The integration suite therefore uses Circle's official Arc Foundry
 Arc's blocklist precompile as an unsupported opcode. The reproducible command is:
 
 ```bash
-ARC_MAINNET_RPC_URL=https://rpc.mainnet.arc.io npm run test:arc-fork --workspace @duelet/contracts
+ARC_MAINNET_RPC_URL=https://rpc.mainnet.arc.io \
+  ARC_MAINNET_FORK_BLOCK=25947829 \
+  npm run test:arc-fork --workspace @duelet/contracts
 ```
 
-On October 14, 2026, that suite passed against the live mainnet RPC with the
+The fork package script forces an Arc Foundry rebuild before execution.
+Upstream and Arc Foundry artifacts must not share an assumed runtime hash:
+running upstream `forge build` can replace the cache with different metadata
+and execution-target bytecode. Release deployment, hash derivation and fork
+assertions all use the forced Arc build.
+
+On October 14, 2026, that pinned suite passed against the live mainnet RPC with the
 real USDC proxy and implementation: local-only balance funding, approval,
 `createAndFund`, partial withdrawal, cancellation/refund, final withdrawal, and
 zero-liability reconciliation. Cheatcode funding changed only fork-local state;
@@ -98,6 +112,8 @@ Compiled optimized size:
 - Runtime bytecode: `6,216` bytes.
 - Initcode: `6,603` bytes.
 - EIP-170 runtime margin: `18,360` bytes.
+- Arc-configured runtime code hash:
+  `0xf4ad4b494fd7d609868ae5737d5840ee903b001767718cba4f249309ff84606f`.
 
 ## Minimum canary lifecycle
 
@@ -107,7 +123,7 @@ mainnet proof is:
 1. Fund the payer wallet within the approved all-in budget.
 2. Deploy the verified non-upgradeable contract.
 3. Approve exactly `10,000` ERC-20 base units.
-4. Create and fund a 180-second, 0.010000 USDC invoice between distinct payer
+4. Create and fund a 300-second, 0.010000 USDC invoice between distinct payer
    and payee addresses.
 5. Trigger one observable partial-time withdrawal to the payee.
 6. Cancel before maturity and verify the exact unvested payer refund.
@@ -122,53 +138,11 @@ timestamps.
 
 ## One-USDC all-in budget
 
-Assumption: the friend has at most `1.000000 USDC` total, including the first
-funding transaction's gas. Phase 1 used compiled bytecode, a live Arc deployment
-estimate, and Arc Foundry call traces. The live gas-price response was
-`20,000,001,337` wei per gas. The budget uses a `30 gwei` fee ceiling plus a 25%
-gas-unit contingency; it is not a prediction of the final wallet quote.
-
-| Action                            | Basis gas |    Budget gas |
-| --------------------------------- | --------: | ------------: |
-| Friend-to-payer native funding    |    21,000 |        30,000 |
-| `DueletStream` deployment         | 1,436,821 |     1,436,821 |
-| Exact `10,000`-unit USDC approval |    56,229 |        56,229 |
-| `createAndFund`                   |   194,816 |       220,000 |
-| Partial `withdraw`                |    78,049 |       100,000 |
-| `cancel` and refund               |    74,517 |        96,000 |
-| Final `withdraw`                  |    28,801 |        50,000 |
-| **Lifecycle subtotal**            |           | **1,989,050** |
-| 25% gas-unit contingency          |           |       497,263 |
-| **Conservative gas ceiling**      |           | **2,486,313** |
-
-At `30 gwei`, the conservative ceiling costs `0.074589390 USDC`. The all-in
-funding ledger is therefore:
-
-| Item                        | Maximum allocation (USDC) |
-| --------------------------- | ------------------------: |
-| Conservative cumulative gas |                  0.074590 |
-| Stream principal            |                  0.010000 |
-| Explorer verification       |                  0.000000 |
-| Uncommitted reserve         |                  0.915410 |
-| **Absolute total**          |              **1.000000** |
-
-If the initial sender pays its fee from the same 1 USDC balance, the amount sent
-to the payer must be reduced by that confirmed fee. The canary remains within
-the preferred 0.8 USDC gas ceiling by a wide margin.
-
-This is an authorization ceiling, not a spending target. Before deployment:
-
-- Repeat deployment and wallet-specific transaction simulations at a pinned
-  current block.
-- Include the live `maxFeePerGas`, not merely the base fee.
-- Stop if cumulative worst-case gas plus principal exceeds available balance.
-- Do not count refunded principal as gas funding before it is confirmed.
-- Do not perform paid verification or a replacement transaction without a
-  revised ledger and explicit approval.
-
-If the friend cannot fund the transfer fee in addition to the amount sent, the
-amount received must be reduced; the product must not assume a hidden second
-source of gas.
+The authoritative transaction-by-transaction ledger is
+[`MAINNET_BUDGET.md`](./MAINNET_BUDGET.md). It currently reserves 2,180,000 gas
+at a 25 gwei maximum fee, or 0.054500 USDC, plus the 0.010000 USDC principal.
+Wallet addresses, nonces, balances, live fee reads and post-deployment
+simulations remain mandatory before any signature.
 
 ## Deployment gates
 

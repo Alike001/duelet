@@ -1,13 +1,24 @@
+'use client';
+
 import { deployment } from '@/lib/chain';
+import { useDeploymentVerification } from '@/lib/deployment-verification';
 
 export function ModeBanner() {
-  if (deployment.mode === 'deployed') return null;
+  const verification = useDeploymentVerification();
+  if (verification.verified) return null;
   return (
     <div className="mode-banner" role="status">
-      <strong>Preview mode</strong>
+      <strong>
+        {deployment.mode === 'preview'
+          ? 'Preview mode'
+          : verification.loading
+            ? 'Verifying deployment'
+            : 'Writes locked'}
+      </strong>
       <span>
-        No Duelet contract is configured or deployed. Illustrations are labeled;
-        writes are disabled.
+        {deployment.mode === 'preview'
+          ? 'No Duelet contract is configured or deployed. Illustrations are labeled; writes are disabled.'
+          : verification.reason}
       </span>
     </div>
   );

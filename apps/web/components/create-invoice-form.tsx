@@ -24,12 +24,19 @@ import {
 
 import { dueletAbi, erc20Abi } from '@/lib/abi';
 import { ARC_CHAIN_ID, ARC_USDC_ADDRESS, deployment, txUrl } from '@/lib/chain';
-import { formatUsdc, parseUsdc, shortHash } from '@/lib/finance';
+import { useDeploymentVerification } from '@/lib/deployment-verification';
+import {
+  formatUsdc,
+  hasExactApproval,
+  parseUsdc,
+  shortHash,
+} from '@/lib/finance';
 
 const DOMAIN = keccak256(stringToHex('ARC_INVOICE_STREAM_V1'));
 
 export function CreateInvoiceForm() {
   const connection = useConnection();
+  const deploymentVerification = useDeploymentVerification();
   const [payee, setPayee] = useState('');
   const [amount, setAmount] = useState('0.010000');
   const [reference, setReference] = useState('');
@@ -134,6 +141,7 @@ export function CreateInvoiceForm() {
   const ready =
     parsed.errors.length === 0 &&
     deployment.address &&
+    deploymentVerification.verified &&
     connection.address &&
     connection.chainId === ARC_CHAIN_ID;
   const balance = useReadContract({
@@ -173,7 +181,7 @@ export function CreateInvoiceForm() {
     query: {
       enabled: Boolean(
         ready &&
-        (allowance.data ?? 0n) >= parsed.baseUnits &&
+        hasExactApproval(allowance.data, parsed.baseUnits) &&
         (balance.data ?? 0n) >= parsed.baseUnits,
       ),
     },
@@ -192,8 +200,9 @@ export function CreateInvoiceForm() {
     onReplaced: ({ reason }) =>
       setReplacementNotice(`Funding transaction was ${reason}.`),
   });
-  const hasAllowance =
-    (allowance.data ?? 0n) >= parsed.baseUnits && parsed.baseUnits > 0n;
+  const hasExactAllowance = hasExactApproval(allowance.data, parsed.baseUnits);
+  const hasExcessAllowance =
+    allowance.data !== undefined && allowance.data > parsed.baseUnits;
   const hasBalance = (balance.data ?? 0n) >= parsed.baseUnits;
   const approvalData = deployment.address
     ? encodeFunctionData({
@@ -222,14 +231,14 @@ export function CreateInvoiceForm() {
     chainId: ARC_CHAIN_ID,
     to: ARC_USDC_ADDRESS,
     data: approvalData,
-    query: { enabled: Boolean(ready && approvalData && !hasAllowance) },
+    query: { enabled: Boolean(ready && approvalData && !hasExactAllowance) },
   });
   const fundingGas = useEstimateGas({
     account: connection.address,
     chainId: ARC_CHAIN_ID,
     to: deployment.address,
     data: fundingData,
-    query: { enabled: Boolean(ready && fundingData && hasAllowance) },
+    query: { enabled: Boolean(ready && fundingData && hasExactAllowance) },
   });
   const gasPrice = useGasPrice({
     chainId: ARC_CHAIN_ID,
@@ -240,7 +249,7 @@ export function CreateInvoiceForm() {
     chainId: ARC_CHAIN_ID,
     query: { enabled: Boolean(ready) },
   });
-  const currentGas = hasAllowance ? fundingGas.data : approvalGas.data;
+  const currentGas = hasExactAllowance ? fundingGas.data : approvalGas.data;
   const estimatedFee =
     currentGas && gasPrice.data ? currentGas * gasPrice.data : undefined;
   const estimatedFeeUsdcUnits =
@@ -393,13 +402,17 @@ export function CreateInvoiceForm() {
             </small>
           </label>
           <label>
-            Privacy-conscious description <em>optional</em>
+            Public metadata commitment <em>optional</em>
             <textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder="A short non-sensitive phrase to commit as a hash"
+              placeholder="A non-sensitive phrase to commit as a public hash"
               rows={3}
             />
+            <small>
+              A hash is not encryption and short phrases can be guessed. Never
+              enter names, addresses, invoice documents, or confidential terms.
+            </small>
           </label>
         </section>
       </form>
@@ -512,7 +525,13 @@ export function CreateInvoiceForm() {
             Insufficient native Arc USDC for the estimated current-step gas.
           </p>
         )}
-        {hasAllowance && !hasFundingReserve && connection.address && (
+        {hasExcessAllowance && connection.address && (
+          <p className="inline-warning">
+            Existing allowance exceeds this invoice. Replace it with the exact
+            amount before funding so no residual authority remains.
+          </p>
+        )}
+        {hasExactAllowance && !hasFundingReserve && connection.address && (
           <p className="inline-warning">
             Balance covers the invoice amount but not the current funding gas
             estimate and principal together.
@@ -521,6 +540,12 @@ export function CreateInvoiceForm() {
         {connection.status !== 'connected' && (
           <p className="inline-warning">
             Connect a wallet to prepare approval and funding.
+          </p>
+        )}
+        {deployment.mode === 'deployed' && !deploymentVerification.verified && (
+          <p className="inline-warning">
+            Contract writes remain locked until deployed bytecode and the USDC
+            immutable match the approved release.
           </p>
         )}
         {connection.status === 'connected' &&
@@ -534,7 +559,7 @@ export function CreateInvoiceForm() {
             className="button button-ghost"
             disabled={
               !ready ||
-              hasAllowance ||
+              hasExactAllowance ||
               !hasGas ||
               approval.isPending ||
               approvalReceipt.isLoading
@@ -543,7 +568,7 @@ export function CreateInvoiceForm() {
             type="button"
           >
             <span>1</span>
-            {hasAllowance
+            {hasExactAllowance
               ? 'Exact allowance available'
               : approvalReceipt.isLoading
                 ? 'Approval submitted…'
@@ -553,7 +578,7 @@ export function CreateInvoiceForm() {
             className="button button-dark"
             disabled={
               !ready ||
-              !hasAllowance ||
+              !hasExactAllowance ||
               !hasBalance ||
               !hasGas ||
               !hasFundingReserve ||

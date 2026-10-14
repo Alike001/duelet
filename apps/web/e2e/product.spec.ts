@@ -77,3 +77,33 @@ test('all primary routes navigate without horizontal overflow', async ({
     expect(overflows, `${route} should not overflow`).toBe(false);
   }
 });
+
+test('production routes survive hard refresh without inventing deployment data', async ({
+  page,
+}) => {
+  const invoiceId = `0x${'11'.repeat(32)}`;
+
+  for (const route of [`/invoices/${invoiceId}`, '/proof/preview']) {
+    await page.goto(route);
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.getByText('Preview mode', { exact: true })).toBeVisible();
+  }
+
+  await expect(page.getByText('Illustrative data')).toBeVisible();
+});
+
+test('primary navigation and actions have visible keyboard focus', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.keyboard.press('Tab');
+
+  const focusedElement = page.locator(':focus-visible');
+  await expect(focusedElement).toBeVisible();
+
+  const focusStyle = await focusedElement.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return `${style.outlineStyle}:${style.outlineWidth}:${style.boxShadow}`;
+  });
+  expect(focusStyle).not.toBe('none:0px:none');
+});

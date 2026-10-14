@@ -20,14 +20,18 @@ export type DueletActivity = {
 
 const client = createPublicClient({ chain: arc, transport: http() });
 const RANGE = 25_000n;
+const CONFIRMATION_DEPTH = 20n;
 
 export async function loadActivity(): Promise<DueletActivity[]> {
   if (!deployment.address || deployment.block === undefined) return [];
   const latest = await client.getBlockNumber();
+  if (latest < deployment.block + CONFIRMATION_DEPTH) return [];
+  const confirmedLatest = latest - CONFIRMATION_DEPTH;
   const all: DueletActivity[] = [];
 
-  for (let from = deployment.block; from <= latest; from += RANGE) {
-    const to = from + RANGE - 1n > latest ? latest : from + RANGE - 1n;
+  for (let from = deployment.block; from <= confirmedLatest; from += RANGE) {
+    const to =
+      from + RANGE - 1n > confirmedLatest ? confirmedLatest : from + RANGE - 1n;
     const [created, withdrawn, canceled] = await Promise.all([
       client.getContractEvents({
         address: deployment.address,

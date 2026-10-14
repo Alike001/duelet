@@ -21,6 +21,7 @@ import {
   txUrl,
 } from '@/lib/chain';
 import { activityForInvoice, loadActivity } from '@/lib/events';
+import { useDeploymentVerification } from '@/lib/deployment-verification';
 import { formatDate, formatUsdc, reconcile, shortHash } from '@/lib/finance';
 import { PREVIEW_INVOICE_ID, previewInvoice, previewNow } from '@/lib/preview';
 
@@ -47,6 +48,7 @@ export function InvoiceView({
   proof?: boolean;
 }) {
   const connection = useConnection();
+  const deploymentVerification = useDeploymentVerification();
   const [replacementNotice, setReplacementNotice] = useState('');
   const preview =
     requestedId === 'preview' ||
@@ -168,12 +170,14 @@ export function InvoiceView({
     query: {
       enabled:
         enabled &&
+        deploymentVerification.verified &&
         connection.chainId === ARC_CHAIN_ID &&
         (data?.claimable ?? 0n) > 0n,
     },
   });
   const canCancel = Boolean(
     enabled &&
+    deploymentVerification.verified &&
     data &&
     data.payer.toLowerCase() === connection.address?.toLowerCase() &&
     data.refundable > 0n,
@@ -432,6 +436,12 @@ export function InvoiceView({
           {data.illustrative && (
             <p className="inline-warning">
               Actions are disabled because this is illustrative preview data.
+            </p>
+          )}
+          {!data.illustrative && !deploymentVerification.verified && (
+            <p className="inline-warning">
+              Actions are locked because the configured deployment has not
+              matched the approved runtime bytecode and Arc USDC immutable.
             </p>
           )}
           {withdraw.error && (

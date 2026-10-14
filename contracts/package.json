@@ -5,11 +5,12 @@
   "license": "MIT",
   "scripts": {
     "build": "forge build",
+    "build:arc": "arc-forge build --force --deny never",
     "format": "forge fmt",
     "format:check": "forge fmt --check",
     "lint": "forge lint --deny warnings",
     "test": "forge test",
-    "test:arc-fork": "arc-forge test --fork-url \"$ARC_MAINNET_RPC_URL\" --match-path test/DueletStream.Fork.t.sol"
+    "test:arc-fork": "ARC_MAINNET_FORK_BLOCK=25947829 arc-forge test --force --deny never --fork-url \"$ARC_MAINNET_RPC_URL\" --fork-block-number 25947829 --match-path test/DueletStream.Fork.t.sol"
   },
   "dependencies": {
     "@openzeppelin/contracts": "5.6.1"

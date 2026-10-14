@@ -1,6 +1,6 @@
 # Product specification: Duelet
 
-Status: Phase 0 specification lock
+Status: implemented financial specification; mainnet deployment pending
 
 Target contract: `DueletStream.sol`
 

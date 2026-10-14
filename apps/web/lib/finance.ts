@@ -43,13 +43,23 @@ export function parseUsdc(value: string): bigint {
   return parseUnits(value.trim(), USDC_DECIMALS);
 }
 
+export function hasExactApproval(
+  allowance: bigint | undefined,
+  amount: bigint,
+) {
+  return amount > 0n && allowance === amount;
+}
+
 export function formatUsdc(value: bigint, maximumFractionDigits = 6): string {
   const [whole, fraction = ''] = formatUnits(value, USDC_DECIMALS).split('.');
   const trimmed = fraction.slice(0, maximumFractionDigits).replace(/0+$/, '');
-  return `${Number(whole).toLocaleString('en-US')}${trimmed ? `.${trimmed}` : ''}`;
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return `${grouped}${trimmed ? `.${trimmed}` : ''}`;
 }
 
 export function formatDate(timestamp: bigint): string {
+  if (timestamp > 8_640_000_000_000n)
+    return `Timestamp ${timestamp.toString()}`;
   return new Intl.DateTimeFormat('en', {
     dateStyle: 'medium',
     timeStyle: 'short',

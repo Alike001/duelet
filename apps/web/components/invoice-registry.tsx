@@ -75,7 +75,7 @@ export function InvoiceRegistry({
     return (
       <RegistryEmpty
         title="No matching invoices found"
-        body="No confirmed creation event matched this role, state, or search. Public RPC history may be incomplete."
+        body="No confirmed creation event matched this role, state, or search. The newest 20 blocks are held for reorganization safety, and public RPC history may be incomplete."
       />
     );
   return (

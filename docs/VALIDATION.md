@@ -1,4 +1,4 @@
-# Phase 1 validation record
+# Release validation record
 
 Date: October 14, 2026
 
@@ -21,17 +21,18 @@ verified against its published SHA-256 before use.
 | Suite       |  Cases | Execution evidence                                     |
 | ----------- | -----: | ------------------------------------------------------ |
 | Unit        |     21 | Identity, schedules, vesting, claims, cancellation     |
-| Fuzz        |      6 | Five 256-run properties plus maximum-amount boundary   |
-| Invariant   |      4 | 128 runs × 64 calls; 8,192 shared handler calls        |
+| Fuzz        |      6 | Five 1,000-run properties plus maximum-amount boundary |
+| Invariant   |      4 | 256 runs × 100 calls; 25,600 shared handler calls      |
 | Adversarial |     13 | Reentrancy, token failures, issuer controls, donations |
 | Arc fork    |      2 | Real mainnet USDC configuration and complete lifecycle |
 | **Total**   | **46** | Zero failed and zero skipped under Arc Foundry         |
 
-The Arc fork lifecycle used the official USDC proxy and implementation, native
-USDC transfer precompile, and blocklist precompile. Test funding was created by
-a local cheatcode after the fork and never existed on mainnet.
+The pinned Phase 3 Arc fork lifecycle used mainnet block `25947829`, the
+official USDC proxy and implementation, native USDC transfer precompile, and
+blocklist precompile. Test funding was created by a local cheatcode after the
+fork and never existed on mainnet.
 
-The 8,192-handler-call campaign evaluates four invariants after every run. The
+The 25,600-handler-call release campaign evaluates four invariants after every run. The
 stateful invariants prove aggregate liability equality and coverage,
 per-invoice conservation, no overwithdrawal or over-refund, frozen cancellation
 entitlement, and immutable withdrawal destinations across three concurrent
@@ -42,27 +43,31 @@ invoices.
 - Runtime bytecode: `6,216` bytes.
 - Initcode: `6,603` bytes.
 - Live read-only Arc deployment estimate: `1,436,821` gas.
+- Arc-configured deployed runtime code hash:
+  `0xf4ad4b494fd7d609868ae5737d5840ee903b001767718cba4f249309ff84606f`.
 - Shared Solidity fixture: 18-second full 1,000-unit claim, 60-second
   cancellation, 6,667-unit refund, and 2,333-unit final claim.
 - Shared TypeScript fixture: the same values using `BigInt` floor division.
 
 ## Repository quality gates
 
-| Check                                | Result |
-| ------------------------------------ | ------ |
-| `npm install` / lockfile resolution  | Passed |
-| `npm audit --audit-level=high`       | Passed |
-| `npm run format:check`               | Passed |
-| `npm run lint`                       | Passed |
-| `npm run typecheck`                  | Passed |
-| `npm run build`                      | Passed |
-| `npm test`                           | Passed |
-| `forge build --sizes`                | Passed |
-| `forge fmt --check`                  | Passed |
-| Arc Foundry full test suite          | Passed |
-| Arc Foundry real-USDC fork lifecycle | Passed |
-| Repository secret scan               | Passed |
-| `git diff --check`                   | Passed |
+| Check                                | Result         |
+| ------------------------------------ | -------------- |
+| `npm install` / lockfile resolution  | Passed         |
+| `npm audit --audit-level=high`       | Passed         |
+| `npm run format:check`               | Passed         |
+| `npm run lint`                       | Passed         |
+| `npm run typecheck`                  | Passed         |
+| `npm run build`                      | Passed         |
+| `npm test`                           | Passed         |
+| `forge build --sizes`                | Passed         |
+| `forge fmt --check`                  | Passed         |
+| Arc Foundry full test suite          | Passed         |
+| Arc Foundry real-USDC fork lifecycle | Passed         |
+| Playwright desktop/mobile journeys   | Passed (14/14) |
+| Keyboard focus and overflow checks   | Passed         |
+| Repository secret scan               | Passed         |
+| `git diff --check`                   | Passed         |
 
 ## Honest limitations
 
@@ -70,6 +75,7 @@ invoices.
 - No contract is deployed or verified on Arc mainnet.
 - Gas figures are estimates, not receipts or guarantees.
 - Wallet-specific transaction simulations remain a deployment-readiness gate.
-- The application routes and wallet transaction UI remain Phase 2 work.
+- Hosting, deployment, wallet-specific simulations and confirmed onchain proof
+  remain release blockers.
 - Circle can pause USDC, block addresses, or change the implementation through
   its external authority.
