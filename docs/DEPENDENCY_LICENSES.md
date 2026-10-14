@@ -3,6 +3,33 @@
 Generated from installed package metadata by `npm run licenses:generate`.
 The package lock is authoritative for the resolved dependency graph.
 
+## Duelet source licensing position
+
+The root `LICENSE` applies the MIT License to original Duelet source and
+documentation owned by this project, including the project-authored Solidity,
+web application, shared domain package, fixtures, scripts, tests, and release
+documentation. The copyright notice is `Copyright (c) 2026 Duelet
+contributors`.
+
+That grant does not relicense third-party software. In particular:
+
+- OpenZeppelin Contracts `5.6.1` is MIT-licensed and imported as a dependency;
+  its notices remain with the installed package.
+- Forge Standard Library `1.11.0` is available under MIT or Apache-2.0 and
+  retains both vendored license files under `contracts/lib/forge-std`.
+- GSAP `3.15.0` and `@gsap/react` `2.1.2` use GreenSock's standard license,
+  not the Duelet MIT license. They are unmodified frontend dependencies and
+  must continue to be used under their own terms.
+- Other npm packages retain the exact declared licenses inventoried below and
+  their notices in the installed packages.
+- Research references to Request Network and Sablier describe public financial
+  behavior. No Request, Sablier, Helio, Peridot, AutoRange, or other reviewed
+  product source is included in Duelet's project-authored implementation.
+
+Repository history, project source, imports, and the locked dependency graph
+were reviewed for this release. No copied restricted reference-product source
+was identified. This is a repository provenance statement, not legal advice.
+
 | Package                                 |      Version | Declared license                                                 |
 | --------------------------------------- | -----------: | ---------------------------------------------------------------- |
 | `@adraffy/ens-normalize`                |       1.11.1 | MIT                                                              |

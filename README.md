@@ -1,5 +1,7 @@
 # Duelet
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 **Invoice once. Pay over time.**
 
 Duelet is an invoice-linked USDC streaming escrow for Arc. A payer records an
@@ -106,5 +108,9 @@ See [`docs/RELEASE_SECURITY_REVIEW.md`](docs/RELEASE_SECURITY_REVIEW.md) and
 
 ## License
 
-Project code is MIT licensed. Dependency declarations and applicable notices
-are recorded in `docs/DEPENDENCY_LICENSES.md` and `THIRD_PARTY_LICENSES.md`.
+Original Duelet source code is available under the [MIT License](LICENSE),
+copyright 2026 Duelet contributors. Third-party components retain their own
+licenses and notices; they are not relicensed by Duelet. Dependency declarations
+and applicable notices are recorded in
+[`docs/DEPENDENCY_LICENSES.md`](docs/DEPENDENCY_LICENSES.md) and
+[`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md).
