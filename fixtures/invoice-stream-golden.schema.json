@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arcinvoicestream.example/schemas/invoice-stream-golden.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "units",
+    "totalAmount",
+    "durationSeconds",
+    "elapsedSeconds",
+    "vestedAmount",
+    "unvestedAmount",
+    "withdrawnBeforeCancellation",
+    "refundedAmount",
+    "remainingPayeeEntitlement",
+    "finalWithdrawnTotal",
+    "finalAccountingTotal",
+    "clock"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "name": { "type": "string" },
+    "units": { "const": "Arc USDC ERC-20 base units (6 decimals)" },
+    "totalAmount": { "pattern": "^[0-9]+$", "type": "string" },
+    "durationSeconds": { "minimum": 1, "type": "integer" },
+    "elapsedSeconds": { "minimum": 0, "type": "integer" },
+    "vestedAmount": { "pattern": "^[0-9]+$", "type": "string" },
+    "unvestedAmount": { "pattern": "^[0-9]+$", "type": "string" },
+    "withdrawnBeforeCancellation": { "pattern": "^[0-9]+$", "type": "string" },
+    "refundedAmount": { "pattern": "^[0-9]+$", "type": "string" },
+    "remainingPayeeEntitlement": { "pattern": "^[0-9]+$", "type": "string" },
+    "finalWithdrawnTotal": { "pattern": "^[0-9]+$", "type": "string" },
+    "finalAccountingTotal": { "pattern": "^[0-9]+$", "type": "string" },
+    "clock": { "const": "deterministic-test-only" }
+  }
+}

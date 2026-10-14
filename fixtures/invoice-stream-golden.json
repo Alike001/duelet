@@ -1,0 +1,16 @@
+{
+  "$schema": "./invoice-stream-golden.schema.json",
+  "name": "partial-withdrawal-then-cancellation-at-sixty-seconds",
+  "units": "Arc USDC ERC-20 base units (6 decimals)",
+  "totalAmount": "10000",
+  "durationSeconds": 180,
+  "elapsedSeconds": 60,
+  "vestedAmount": "3333",
+  "unvestedAmount": "6667",
+  "withdrawnBeforeCancellation": "1000",
+  "refundedAmount": "6667",
+  "remainingPayeeEntitlement": "2333",
+  "finalWithdrawnTotal": "3333",
+  "finalAccountingTotal": "10000",
+  "clock": "deterministic-test-only"
+}

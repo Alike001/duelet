@@ -1,0 +1,13 @@
+.next
+apps/web/next-env.d.ts
+node_modules
+dist
+out
+cache
+coverage
+broadcast
+contracts/src
+contracts/test
+contracts/script
+docs/research
+package-lock.json
