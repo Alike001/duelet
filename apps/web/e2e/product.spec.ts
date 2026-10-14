@@ -17,11 +17,13 @@ async function captureEvidence(
 async function installInjectedWallet(
   page: import('@playwright/test').Page,
   initialChainId = 5042,
+  rejectConnection = false,
 ) {
   await page.addInitScript(
-    ({ account, chain }) => {
+    ({ account, chain, reject }) => {
       const listeners = new Map<string, Set<(...args: unknown[]) => void>>();
       let chainId = chain;
+      let selectedAccount = account;
       const emit = (event: string, ...args: unknown[]) =>
         listeners.get(event)?.forEach((listener) => listener(...args));
       const provider = {
@@ -35,8 +37,21 @@ async function installInjectedWallet(
         }) => {
           if (method === 'eth_chainId') return `0x${chainId.toString(16)}`;
           if (method === 'net_version') return chainId.toString();
-          if (method === 'eth_accounts' || method === 'eth_requestAccounts')
-            return [account];
+          if (method === 'eth_accounts') {
+            return localStorage.getItem('duelet-test-wallet-authorized') ===
+              'yes'
+              ? [selectedAccount]
+              : [];
+          }
+          if (method === 'eth_requestAccounts') {
+            if (reject) {
+              throw Object.assign(new Error('User rejected the request.'), {
+                code: 4001,
+              });
+            }
+            localStorage.setItem('duelet-test-wallet-authorized', 'yes');
+            return [selectedAccount];
+          }
           if (method === 'eth_getBalance') return '0xde0b6b3a7640000';
           if (method === 'wallet_switchEthereumChain') {
             const requested = params?.[0] as { chainId?: string } | undefined;
@@ -66,9 +81,66 @@ async function installInjectedWallet(
           chainId = nextChain;
           emit('chainChanged', `0x${chainId.toString(16)}`);
         },
+        __dueletSetAccount: (nextAccount: string) => {
+          selectedAccount = nextAccount;
+          emit('accountsChanged', [selectedAccount]);
+        },
       });
     },
-    { account: TEST_ACCOUNT, chain: initialChainId },
+    { account: TEST_ACCOUNT, chain: initialChainId, reject: rejectConnection },
+  );
+}
+
+async function installEip6963Wallets(page: import('@playwright/test').Page) {
+  await page.addInitScript(
+    ({ account }) => {
+      const makeProvider = (flags: Record<string, boolean>) => ({
+        ...flags,
+        request: async ({ method }: { method: string }) => {
+          if (method === 'eth_chainId') return '0x13b2';
+          if (method === 'net_version') return '5042';
+          if (method === 'eth_accounts') return [];
+          if (method === 'eth_requestAccounts') return [account];
+          if (method === 'eth_getBalance') return '0xde0b6b3a7640000';
+          if (method === 'wallet_getCapabilities') return {};
+          return null;
+        },
+        on: () => undefined,
+        removeListener: () => undefined,
+      });
+      const providers = [
+        {
+          info: {
+            uuid: '00000000-0000-4000-8000-000000000001',
+            name: 'MetaMask',
+            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>',
+            rdns: 'io.metamask',
+          },
+          provider: makeProvider({ isMetaMask: true }),
+        },
+        {
+          info: {
+            uuid: '00000000-0000-4000-8000-000000000002',
+            name: 'Rabby Wallet',
+            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>',
+            rdns: 'io.rabby',
+          },
+          provider: makeProvider({ isRabby: true }),
+        },
+      ];
+      Object.defineProperty(window, 'ethereum', {
+        configurable: true,
+        value: providers[0].provider,
+      });
+      const announce = () =>
+        providers.forEach((detail) =>
+          window.dispatchEvent(
+            new CustomEvent('eip6963:announceProvider', { detail }),
+          ),
+        );
+      window.addEventListener('eip6963:requestProvider', announce);
+    },
+    { account: TEST_ACCOUNT },
   );
 }
 
@@ -139,10 +211,52 @@ test('wallet sheet explains connection choices without weakening preview mode', 
     page.getByRole('heading', { name: 'Connect to Duelet' }),
   ).toBeVisible();
   await expect(page.getByText('No browser wallet detected')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Get MetaMask' })).toBeVisible();
   await expect(page.getByText(/WalletConnect QR/)).toHaveCount(0);
   await expect(page.getByText(/Wagmi|Reown/)).toHaveCount(0);
   await expect(page.getByText(/payments are disabled/i)).toBeVisible();
   await captureEvidence(page, 'wallet-selection-modal');
+});
+
+test('EIP-6963 discovery presents multiple real browser wallets once', async ({
+  page,
+}) => {
+  await installEip6963Wallets(page);
+  await page.goto('/');
+  await page.locator('header .wallet-trigger').click();
+  await expect(page.getByRole('button', { name: /MetaMask/ })).toHaveCount(1);
+  await expect(page.getByRole('button', { name: /Rabby Wallet/ })).toHaveCount(
+    1,
+  );
+  await expect(page.getByText('Browser wallet', { exact: true })).toHaveCount(
+    0,
+  );
+  await captureEvidence(page, 'wallet-multiple-providers');
+});
+
+test('wallet rejection stays disconnected and shows a human message', async ({
+  page,
+}) => {
+  await installInjectedWallet(page, 5042, true);
+  await page.goto('/');
+  await page.locator('header .wallet-trigger').click();
+  await page.getByRole('button', { name: /MetaMask/ }).click();
+  await expect(page.locator('.wallet-error')).toHaveText(
+    'Wallet connection canceled. No account was connected.',
+  );
+  await expect(page.locator('header .wallet-trigger')).toContainText('Connect');
+});
+
+test('wallet dialog closes with Escape and returns focus to its trigger', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const trigger = page.locator('header .wallet-trigger');
+  await trigger.click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await expect(trigger).toBeFocused();
 });
 
 test('injected wallet connects, exposes Arc status, copies, and disconnects', async ({
@@ -157,7 +271,9 @@ test('injected wallet connects, exposes Arc status, copies, and disconnects', as
   await page.reload({ waitUntil: 'networkidle' });
   await expect(page.getByText('0x10000…00001').first()).toBeVisible();
   await page.locator('header .wallet-trigger').click();
-  await expect(page.getByText('Connected to Arc mainnet')).toBeVisible();
+  await expect(
+    page.getByText('MetaMask · Connected to Arc mainnet'),
+  ).toBeVisible();
   await expect(page.getByText('Available on Arc')).toBeVisible();
   await captureEvidence(page, 'wallet-connected');
   await page.getByRole('button', { name: /Disconnect wallet/ }).click();
@@ -175,19 +291,30 @@ test('account and chain changes expose a recoverable wrong-network state', async
   await page.getByRole('button', { name: /Browser wallet|MetaMask/ }).click();
   await page.evaluate(() => {
     const testWindow = window as typeof window & {
+      __dueletSetAccount: (account: string) => void;
+    };
+    testWindow.__dueletSetAccount('0x2000000000000000000000000000000000000002');
+  });
+  await expect(page.locator('header .wallet-trigger')).toContainText(
+    '0x20000…00002',
+  );
+  await page.evaluate(() => {
+    const testWindow = window as typeof window & {
       __dueletSetChain: (chain: number) => void;
     };
     testWindow.__dueletSetChain(1);
   });
   await expect(page.locator('header .wallet-trigger')).toHaveClass(/wrong/);
   await page.locator('header .wallet-trigger').click();
-  await expect(page.getByText('Unsupported network')).toBeVisible();
+  await expect(page.getByText('MetaMask · Unsupported network')).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Switch to Arc mainnet' }),
   ).toBeVisible();
   await captureEvidence(page, 'wallet-wrong-network');
   await page.getByRole('button', { name: 'Switch to Arc mainnet' }).click();
-  await expect(page.getByText('Connected to Arc mainnet')).toBeVisible();
+  await expect(
+    page.getByText('MetaMask · Connected to Arc mainnet'),
+  ).toBeVisible();
 });
 
 test('all primary routes navigate without horizontal overflow', async ({
