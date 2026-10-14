@@ -232,7 +232,12 @@ test('WalletConnect initializes a genuine responsive session', async ({
     await expect(page.getByRole('alertdialog')).toBeVisible();
     await expect(page.getByRole('button', { name: /MetaMask/ })).toBeVisible();
   } else {
-    await expect(page.locator('wui-qr-code')).toBeVisible({ timeout: 15_000 });
+    await expect(
+      page.getByText('Scan this QR Code with your phone'),
+    ).toBeVisible({ timeout: 15_000 });
+    await expect(
+      page.getByRole('button', { name: /Search Wallet/ }),
+    ).toBeVisible();
   }
   await captureEvidence(page, 'walletconnect-qr');
 });
