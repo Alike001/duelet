@@ -7,7 +7,7 @@ export default function ActivityPage() {
     <PageShell compact>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">Confirmed contract history</p>
+          <p className="page-kicker">Confirmed payment history</p>
           <h1>Activity</h1>
           <p>
             Creation, claim, and cancellation events read from Arc. A simulation

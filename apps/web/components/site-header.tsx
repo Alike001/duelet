@@ -6,10 +6,10 @@ import { usePathname } from 'next/navigation';
 import { WalletButton } from './wallet-button';
 
 const nav = [
-  ['/app', 'Workspace'],
-  ['/invoices', 'Invoices'],
+  ['/app', 'Overview'],
+  ['/invoices', 'My invoices'],
   ['/activity', 'Activity'],
-  ['/docs', 'Docs'],
+  ['/docs', 'Documentation'],
 ] as const;
 
 export function SiteHeader() {

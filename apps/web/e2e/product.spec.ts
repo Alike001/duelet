@@ -81,10 +81,10 @@ test('landing page explains the real mechanism and preview status', async ({
   ).toBeVisible();
   await expect(page.getByText('Preview mode', { exact: true })).toBeVisible();
   await expect(
-    page.getByText(/Claims are triggered transactions/),
+    page.getByText(/Earned USDC becomes available over time/),
   ).toBeVisible();
   await expect(
-    page.getByRole('link', { name: /Create an invoice/ }).first(),
+    page.getByRole('link', { name: /Create payment/ }).first(),
   ).toBeVisible();
 });
 
@@ -93,12 +93,12 @@ test('creation flow validates inputs and blocks writes before deployment', async
 }) => {
   await page.goto('/invoices/new');
   await expect(
-    page.getByRole('heading', { name: 'Create invoice' }),
+    page.getByRole('heading', { name: 'Compose payment' }),
   ).toBeVisible();
   await expect(
     page.getByRole('button', { name: /Approve exact amount/ }),
   ).toBeDisabled();
-  await page.getByLabel('Payee wallet address').fill('not-an-address');
+  await page.getByLabel('Recipient wallet address').fill('not-an-address');
   await expect(page.getByText('Enter a valid payee address.')).toBeVisible();
   await expect(
     page.getByText(/No transaction is available until/),
@@ -110,19 +110,21 @@ test('illustrative proof reconciles without claiming onchain evidence', async ({
 }) => {
   await page.goto('/proof/preview');
   await expect(
-    page.getByRole('heading', { name: 'Invoice proof' }),
+    page.getByRole('heading', { name: 'Public payment proof' }),
   ).toBeVisible();
   await expect(page.getByText('0.01', { exact: true }).first()).toBeVisible();
   await expect(
     page.getByText(/browser-calculated from the shared golden fixture/),
   ).toBeVisible();
-  await expect(page.getByText('Illustrative data')).toBeVisible();
+  await expect(
+    page.getByText('Illustrative data', { exact: true }),
+  ).toBeVisible();
 });
 
 test('workspace and activity present honest empty states', async ({ page }) => {
   await page.goto('/app');
   await expect(
-    page.getByText('Connect a wallet to find your invoices.'),
+    page.getByText('Connect to see payments tied to your address.'),
   ).toBeVisible();
   await page.goto('/activity');
   await expect(page.getByText('No onchain activity yet')).toBeVisible();
@@ -136,14 +138,10 @@ test('wallet sheet explains connection choices without weakening preview mode', 
   await expect(
     page.getByRole('heading', { name: 'Connect to Duelet' }),
   ).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: /MetaMask or browser wallet/ }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: /WalletConnect QR/ }),
-  ).toBeDisabled();
-  await expect(page.getByText(/stable adapter targets Wagmi 2/)).toBeVisible();
-  await expect(page.getByText(/writes are disabled/i)).toBeVisible();
+  await expect(page.getByText('No browser wallet detected')).toBeVisible();
+  await expect(page.getByText(/WalletConnect QR/)).toHaveCount(0);
+  await expect(page.getByText(/Wagmi|Reown/)).toHaveCount(0);
+  await expect(page.getByText(/payments are disabled/i)).toBeVisible();
   await captureEvidence(page, 'wallet-selection-modal');
 });
 
@@ -153,20 +151,18 @@ test('injected wallet connects, exposes Arc status, copies, and disconnects', as
   await installInjectedWallet(page);
   await page.goto('/app');
   await page.locator('header .wallet-trigger').click();
-  await page
-    .getByRole('button', { name: /MetaMask or browser wallet/ })
-    .click();
+  await page.getByRole('button', { name: /Browser wallet|MetaMask/ }).click();
   await expect(page.locator('header .wallet-trigger')).not.toHaveClass(/wrong/);
   await expect(page.getByText('0x10000…00001').first()).toBeVisible();
   await page.reload({ waitUntil: 'networkidle' });
   await expect(page.getByText('0x10000…00001').first()).toBeVisible();
   await page.locator('header .wallet-trigger').click();
   await expect(page.getByText('Connected to Arc mainnet')).toBeVisible();
-  await expect(page.getByText(/18-decimal native precision/)).toBeVisible();
+  await expect(page.getByText('Available on Arc')).toBeVisible();
   await captureEvidence(page, 'wallet-connected');
   await page.getByRole('button', { name: /Disconnect wallet/ }).click();
   await expect(
-    page.getByText('Connect a wallet to find your invoices.'),
+    page.getByText('Connect to see payments tied to your address.'),
   ).toBeVisible();
 });
 
@@ -176,9 +172,7 @@ test('account and chain changes expose a recoverable wrong-network state', async
   await installInjectedWallet(page);
   await page.goto('/');
   await page.locator('header .wallet-trigger').click();
-  await page
-    .getByRole('button', { name: /MetaMask or browser wallet/ })
-    .click();
+  await page.getByRole('button', { name: /Browser wallet|MetaMask/ }).click();
   await page.evaluate(() => {
     const testWindow = window as typeof window & {
       __dueletSetChain: (chain: number) => void;
@@ -229,7 +223,9 @@ test('production routes survive hard refresh without inventing deployment data',
     await expect(page.getByText('Preview mode', { exact: true })).toBeVisible();
   }
 
-  await expect(page.getByText('Illustrative data')).toBeVisible();
+  await expect(
+    page.getByText('Illustrative data', { exact: true }),
+  ).toBeVisible();
 });
 
 test('dynamic routes reject malformed invoice IDs', async ({ page }) => {
@@ -268,15 +264,17 @@ test('primary navigation remains available on compact screens', async ({
   });
   await expect(navigation).toBeVisible();
   await expect(
-    navigation.getByRole('link', { name: 'Workspace' }),
+    navigation.getByRole('link', { name: 'Overview' }),
   ).toBeVisible();
   await expect(
-    navigation.getByRole('link', { name: 'Invoices' }),
+    navigation.getByRole('link', { name: 'My invoices' }),
   ).toBeVisible();
   await expect(
     navigation.getByRole('link', { name: 'Activity' }),
   ).toBeVisible();
-  await expect(navigation.getByRole('link', { name: 'Docs' })).toBeVisible();
+  await expect(
+    navigation.getByRole('link', { name: 'Documentation' }),
+  ).toBeVisible();
 });
 
 test('financial forms and controls retain accessible names', async ({
@@ -315,7 +313,7 @@ test('reduced-motion preference disables decorative movement', async ({
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   const duration = await page
-    .locator('.marquee div')
+    .locator('.stream-instrument .progress-track > span')
     .evaluate((element) => getComputedStyle(element).animationDuration);
   expect(Number.parseFloat(duration)).toBeLessThanOrEqual(0.00001);
 });

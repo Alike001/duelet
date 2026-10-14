@@ -5,7 +5,6 @@ import type { ReactNode } from 'react';
 import { Providers } from '@/components/providers';
 
 import './globals.css';
-import './final-theme.css';
 
 const sans = Plus_Jakarta_Sans({
   subsets: ['latin'],

@@ -6,11 +6,11 @@ export default function NewInvoicePage() {
     <PageShell compact>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">New payment schedule</p>
-          <h1>Create invoice</h1>
+          <p className="page-kicker">New payment</p>
+          <h1>Compose payment</h1>
           <p>
-            Lock the full USDC amount once. The payee earns it linearly between
-            immutable timestamps.
+            Set the recipient, amount, and schedule. Review every term before
+            any wallet request appears.
           </p>
         </div>
       </div>
