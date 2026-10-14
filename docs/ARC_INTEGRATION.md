@@ -22,6 +22,7 @@ decimal model, and 20 Gwei minimum fee behavior:
 - [RPC endpoints](https://docs.arc.io/arc/references/rpc-endpoints.md)
 - [Contract addresses](https://docs.arc.io/arc/references/contract-addresses.md)
 - [EVM differences](https://docs.arc.io/arc/references/evm-differences.md)
+- [Arc Foundry](https://github.com/circlefin/arc-foundry)
 
 A read-only RPC check during Phase 0 returned chain ID `5042`; calling
 `decimals()` and `symbol()` at the configured address returned `6` and `USDC`.
@@ -62,7 +63,7 @@ Tests must explicitly place two blocks at the same timestamp and prove:
 
 ## Foundry configuration
 
-The `contracts/foundry.toml` foundation pins:
+The `contracts/foundry.toml` configuration pins:
 
 - Solidity `0.8.37` with auto-detection disabled.
 - Osaka EVM output.
@@ -71,10 +72,25 @@ The `contracts/foundry.toml` foundation pins:
 - `ARC_MAINNET_RPC_URL` as an environment-substituted read-only fork endpoint.
 - OpenZeppelin resolved from the npm workspace, avoiding nested Git
   repositories.
+- An `arc` profile selecting Arc execution semantics.
 
-Phase 0 contains no Solidity production source. Phase 1 must confirm compiled
-bytecode size, gas estimates, and compatibility against an Arc fork before any
-deployment proposal.
+Arc uses execution-layer precompiles for native USDC transfer and blocklist
+checks. Upstream Foundry can read the forked proxy but cannot execute those
+precompiles. The integration suite therefore uses Circle's official Arc Foundry
+`v0.8.0-2`, installed with its published SHA-256 verified, and
+`FOUNDRY_PROFILE=arc`.
+
+On October 14, 2026, that suite passed against the live mainnet RPC with the
+real USDC proxy and implementation: local-only balance funding, approval,
+`createAndFund`, partial withdrawal, cancellation/refund, final withdrawal, and
+zero-liability reconciliation. Cheatcode funding changed only fork-local state;
+it did not obtain or transfer mainnet funds.
+
+Compiled optimized size:
+
+- Runtime bytecode: `6,216` bytes.
+- Initcode: `6,603` bytes.
+- EIP-170 runtime margin: `18,360` bytes.
 
 ## Minimum canary lifecycle
 
@@ -99,33 +115,44 @@ timestamps.
 
 ## One-USDC all-in budget
 
-Assumption: the friend has at most `1.000000 USDC` total available, including
-the funding transfer's gas. The friend should therefore retain up to `0.010000`
-for that transfer and send approximately `0.990000 USDC` to the payer wallet.
-Actual values must be recomputed from a live simulation.
+Assumption: the friend has at most `1.000000 USDC` total, including the first
+funding transaction's gas. Phase 1 used compiled bytecode, a live Arc deployment
+estimate, and Arc Foundry call traces. The live gas-price response was
+`20,000,001,337` wei per gas. The budget uses a `30 gwei` fee ceiling plus a 25%
+gas-unit contingency; it is not a prediction of the final wallet quote.
 
-| Item                                    | Maximum allocation (USDC) | Notes                                                                |
-| --------------------------------------- | ------------------------: | -------------------------------------------------------------------- |
-| Friend-to-payer funding transaction gas |                  0.010000 | Paid by sender; included in all-in cap                               |
-| Contract deployment                     |                  0.200000 | Above the 0.160862 compiled Sablier benchmark cost at 20 Gwei        |
-| Exact USDC approval                     |                  0.020000 | One payer transaction                                                |
-| Invoice creation and funding            |                  0.080000 | One payer transaction                                                |
-| Partial withdrawal trigger              |                  0.050000 | Payer can trigger; funds go to payee                                 |
-| Cancellation and refund                 |                  0.060000 | One payer transaction                                                |
-| Final withdrawal trigger                |                  0.050000 | Payer can trigger; payee needs no gas                                |
-| Explorer contract verification          |                  0.000000 | Expected offchain; paid verification is prohibited                   |
-| User-wallet gas contingency             |                  0.320000 | Covers estimate variance and replacement, never intentional failures |
-| Stream principal                        |                  0.010000 | Temporarily escrowed; distributed/refunded by lifecycle              |
-| Uncommitted safety reserve              |                  0.200000 | Must remain unspent                                                  |
-| **Total**                               |              **1.000000** | Absolute combined envelope                                           |
+| Action                            | Basis gas |    Budget gas |
+| --------------------------------- | --------: | ------------: |
+| Friend-to-payer native funding    |    21,000 |        30,000 |
+| `DueletStream` deployment         | 1,436,821 |     1,436,821 |
+| Exact `10,000`-unit USDC approval |    56,229 |        56,229 |
+| `createAndFund`                   |   194,816 |       220,000 |
+| Partial `withdraw`                |    78,049 |       100,000 |
+| `cancel` and refund               |    74,517 |        96,000 |
+| Final `withdraw`                  |    28,801 |        50,000 |
+| **Lifecycle subtotal**            |           | **1,989,050** |
+| 25% gas-unit contingency          |           |       497,263 |
+| **Conservative gas ceiling**      |           | **2,486,313** |
 
-The payer wallet's post-funding envelope is `0.990000 USDC`: at most `0.780000`
-for its own gas, `0.010000` principal, and `0.200000` uncommitted reserve.
-Planned user gas is below the preferred 0.8 USDC ceiling.
+At `30 gwei`, the conservative ceiling costs `0.074589390 USDC`. The all-in
+funding ledger is therefore:
+
+| Item                        | Maximum allocation (USDC) |
+| --------------------------- | ------------------------: |
+| Conservative cumulative gas |                  0.074590 |
+| Stream principal            |                  0.010000 |
+| Explorer verification       |                  0.000000 |
+| Uncommitted reserve         |                  0.915410 |
+| **Absolute total**          |              **1.000000** |
+
+If the initial sender pays its fee from the same 1 USDC balance, the amount sent
+to the payer must be reduced by that confirmed fee. The canary remains within
+the preferred 0.8 USDC gas ceiling by a wide margin.
 
 This is an authorization ceiling, not a spending target. Before deployment:
 
-- Replace allocations with exact compiled and simulated estimates.
+- Repeat deployment and wallet-specific transaction simulations at a pinned
+  current block.
 - Include the live `maxFeePerGas`, not merely the base fee.
 - Stop if cumulative worst-case gas plus principal exceeds available balance.
 - Do not count refunded principal as gas funding before it is confirmed.

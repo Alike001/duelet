@@ -10,20 +10,35 @@ const fixtureUrl = new URL(
 test('the shared cancellation fixture matches the locked integer accounting', async () => {
   const fixture = JSON.parse(await readFile(fixtureUrl, 'utf8'));
   const total = BigInt(fixture.totalAmount);
-  const vested =
-    (total * BigInt(fixture.elapsedSeconds)) / BigInt(fixture.durationSeconds);
+  const vestedAtFirstWithdrawal =
+    (total * BigInt(fixture.firstWithdrawalElapsedSeconds)) /
+    BigInt(fixture.durationSeconds);
+  const vestedAtCancellation =
+    (total * BigInt(fixture.cancellationElapsedSeconds)) /
+    BigInt(fixture.durationSeconds);
   const withdrawn = BigInt(fixture.withdrawnBeforeCancellation);
-  const refund = total - vested;
-  const remainingEntitlement = vested - withdrawn;
+  const refund = total - vestedAtCancellation;
+  const remainingEntitlement = vestedAtCancellation - withdrawn;
 
-  assert.equal(vested, BigInt(fixture.vestedAmount));
+  assert.equal(
+    vestedAtFirstWithdrawal,
+    BigInt(fixture.vestedAmountAtFirstWithdrawal),
+  );
+  assert.equal(withdrawn, vestedAtFirstWithdrawal);
+  assert.equal(
+    vestedAtCancellation,
+    BigInt(fixture.vestedAmountAtCancellation),
+  );
   assert.equal(refund, BigInt(fixture.refundedAmount));
-  assert.equal(total - vested, BigInt(fixture.unvestedAmount));
+  assert.equal(total - vestedAtCancellation, BigInt(fixture.unvestedAmount));
   assert.equal(remainingEntitlement, BigInt(fixture.remainingPayeeEntitlement));
   assert.equal(
     withdrawn + remainingEntitlement,
     BigInt(fixture.finalWithdrawnTotal),
   );
-  assert.equal(vested + refund, BigInt(fixture.finalAccountingTotal));
+  assert.equal(
+    vestedAtCancellation + refund,
+    BigInt(fixture.finalAccountingTotal),
+  );
   assert.equal(fixture.clock, 'deterministic-test-only');
 });

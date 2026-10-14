@@ -4,8 +4,8 @@ import type { ReactNode } from 'react';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'ArcInvoiceStream',
-  description: 'Arc-native invoice-linked USDC streaming escrow.',
+  title: 'Duelet — Invoice once. Pay over time.',
+  description: 'Invoice-linked USDC streaming escrow on Arc.',
 };
 
 export default function RootLayout({

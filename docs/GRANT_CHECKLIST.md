@@ -8,13 +8,13 @@ Status: not submitted; not deployed
 - [ ] Public GitHub repository.
 - [ ] Live working link.
 - [ ] Public builder profile.
-- [ ] Accurate explanation of what ArcInvoiceStream does and why it uses Arc.
+- [ ] Accurate explanation of what Duelet does and why it uses Arc.
 - [ ] Real mainnet implementation proof with confirmed transaction hashes.
 - [ ] Honest limitations, dependency disclosure, and unaudited warning.
 
 ## Product proof required before submission
 
-- [ ] Verified non-upgradeable `ArcInvoiceStream` deployment.
+- [ ] Verified non-upgradeable `DueletStream` deployment.
 - [ ] Real Arc USDC allowance.
 - [ ] Real 0.010000 USDC invoice creation and escrow funding.
 - [ ] Observable partial-time vested withdrawal.
@@ -34,14 +34,14 @@ Status: not submitted; not deployed
   verifiable evidence.
 - Do not imply Circle, Request Network, or Sablier partnership or endorsement.
 
-## Current Phase 0 evidence
+## Current Phase 1 evidence
 
-- [x] Product and financial model locked.
+- [x] Product and financial model locked and implemented in `DueletStream`.
 - [x] Arc configuration documented from official sources.
-- [x] Threat model and required test matrix documented.
-- [x] Shared deterministic fixture recorded.
+- [x] Threat model and unit, fuzz, invariant, adversarial, and fork suites implemented.
+- [x] Shared deterministic Solidity and TypeScript fixture verified.
 - [x] Repository foundation and CI configured.
-- [ ] Production contract implementation — Phase 1, not started.
+- [x] Production contract implementation — unaudited and not deployed.
 - [ ] Professional frontend — later phase, not started.
 - [ ] Mainnet deployment — requires explicit approval.
 - [ ] Mainnet transactions — requires explicit approval.

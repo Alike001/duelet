@@ -1,5 +1,5 @@
 {
-  "name": "arc-invoice-stream",
+  "name": "duelet",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -16,8 +16,8 @@
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm run build && npm test && npm run secret:scan && git diff --check",
-    "format": "prettier --write . && npm run format --workspace @arc-invoice-stream/contracts",
-    "format:check": "prettier --check . && npm run format:check --workspace @arc-invoice-stream/contracts",
+    "format": "prettier --write . && npm run format --workspace @duelet/contracts",
+    "format:check": "prettier --check . && npm run format:check --workspace @duelet/contracts",
     "licenses:generate": "node scripts/generate-license-report.mjs",
     "lint": "npm run lint --workspaces --if-present",
     "secret:scan": "bash scripts/secret-scan.sh",

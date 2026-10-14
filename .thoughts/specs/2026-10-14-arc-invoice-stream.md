@@ -1,4 +1,4 @@
-# Spec: ArcInvoiceStream
+# Spec: Duelet (originally ArcInvoiceStream)
 
 ## Objective
 
@@ -8,9 +8,10 @@ refund and payee claim rights.
 
 ## Current reality
 
-Phase 0 contains configuration, documentation, and deterministic fixtures only.
-The authoritative requirements are in `docs/PRODUCT_SPEC.md` and the exact
-accounting model is in `docs/FINANCIAL_MODEL.md`.
+Phase 0 established configuration, documentation, and deterministic fixtures.
+Phase 1 now implements those requirements in `DueletStream.sol`. The
+authoritative requirements remain in `docs/PRODUCT_SPEC.md` and the exact
+accounting model remains in `docs/FINANCIAL_MODEL.md`.
 
 ## Goals
 

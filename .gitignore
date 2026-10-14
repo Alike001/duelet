@@ -15,5 +15,4 @@ broadcast/
 .DS_Store
 .idea/
 .vscode/
-
-contracts/lib/
+.tools/

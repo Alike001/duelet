@@ -6,4 +6,10 @@ export const ARC_MAINNET = {
   usdcDecimals: 6,
 } as const;
 
-export const PHASE = 'foundation-only' as const;
+export const PRODUCT = {
+  name: 'Duelet',
+  tagline: 'Invoice once. Pay over time.',
+  description: 'Invoice-linked USDC streaming escrow on Arc.',
+} as const;
+
+export const PHASE = 'smart-contract-implemented' as const;

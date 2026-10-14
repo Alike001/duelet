@@ -23,8 +23,8 @@
 /docs
 ```
 
-Only the Phase 0 placeholder home page exists today. These routes describe the
-approved future product surface; they are not implemented claims.
+Only the rebranded Phase 1 placeholder home page exists today. These routes
+describe the approved future product surface; they are not implemented claims.
 
 ## `/` — landing page
 

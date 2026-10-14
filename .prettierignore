@@ -1,4 +1,5 @@
 .next
+.tools
 apps/web/next-env.d.ts
 node_modules
 dist
@@ -9,5 +10,6 @@ broadcast
 contracts/src
 contracts/test
 contracts/script
+contracts/lib
 docs/research
 package-lock.json

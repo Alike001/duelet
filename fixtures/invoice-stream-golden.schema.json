@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://arcinvoicestream.example/schemas/invoice-stream-golden.schema.json",
+  "$id": "https://duelet.example/schemas/invoice-stream-golden.schema.json",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -8,8 +8,10 @@
     "units",
     "totalAmount",
     "durationSeconds",
-    "elapsedSeconds",
-    "vestedAmount",
+    "firstWithdrawalElapsedSeconds",
+    "vestedAmountAtFirstWithdrawal",
+    "cancellationElapsedSeconds",
+    "vestedAmountAtCancellation",
     "unvestedAmount",
     "withdrawnBeforeCancellation",
     "refundedAmount",
@@ -24,8 +26,16 @@
     "units": { "const": "Arc USDC ERC-20 base units (6 decimals)" },
     "totalAmount": { "pattern": "^[0-9]+$", "type": "string" },
     "durationSeconds": { "minimum": 1, "type": "integer" },
-    "elapsedSeconds": { "minimum": 0, "type": "integer" },
-    "vestedAmount": { "pattern": "^[0-9]+$", "type": "string" },
+    "firstWithdrawalElapsedSeconds": { "minimum": 0, "type": "integer" },
+    "vestedAmountAtFirstWithdrawal": {
+      "pattern": "^[0-9]+$",
+      "type": "string"
+    },
+    "cancellationElapsedSeconds": { "minimum": 0, "type": "integer" },
+    "vestedAmountAtCancellation": {
+      "pattern": "^[0-9]+$",
+      "type": "string"
+    },
     "unvestedAmount": { "pattern": "^[0-9]+$", "type": "string" },
     "withdrawnBeforeCancellation": { "pattern": "^[0-9]+$", "type": "string" },
     "refundedAmount": { "pattern": "^[0-9]+$", "type": "string" },

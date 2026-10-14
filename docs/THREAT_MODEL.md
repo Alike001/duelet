@@ -1,6 +1,6 @@
 # Threat model
 
-Status: Phase 0 design review; no production contract exists
+Status: Phase 1 implementation review; unaudited and not deployed
 
 ## Protected assets and properties
 
@@ -33,7 +33,7 @@ Status: Phase 0 design review; no production contract exists
 | Double cancellation/refund        | Insolvency                                | Nonzero `canceledAt` guard and atomic state update                                      |
 | Reentrancy during funding         | Duplicate or underfunded invoice          | `nonReentrant`, ID reservation before transfer, exact balance delta                     |
 | Reentrancy during payout/refund   | Repeated transfer                         | `nonReentrant` and checks-effects-interactions                                          |
-| Fee-on-transfer/nonstandard token | Underfunded invoice                       | Immutable allowlisted USDC plus exact balance-delta check and SafeERC20                 |
+| Fee-on-transfer/nonstandard token | Underfunded escrow or short-paid claim    | Immutable allowlisted USDC plus exact sender and recipient balance deltas and SafeERC20 |
 | Timestamp assumptions             | Unexpected vesting                        | Seconds-based math; boundary and same-timestamp-block tests                             |
 | Multiplication overflow           | Incorrect vesting                         | OpenZeppelin `Math.mulDiv` with downward rounding                                       |
 | Cross-invoice contamination       | One invoice consumes another's funds      | Per-invoice delta checks and aggregate solvency invariant                               |
@@ -79,7 +79,7 @@ Status: Phase 0 design review; no production contract exists
 
 - Funding, withdrawal, and cancellation token failures revert all accounting.
 - Exact contract and wallet balance deltas are asserted.
-- Fee-on-transfer funding is rejected.
+- Fee-on-transfer funding, withdrawal, and refund paths are rejected atomically.
 - Reentrant funding, withdrawal, and cancellation attempts fail.
 - USDC pause/blocklist behavior is exercised on a controllable mock and on an
   Arc fork where the real implementation permits safe simulation.

@@ -1,5 +1,5 @@
 {
-  "name": "@arc-invoice-stream/domain",
+  "name": "@duelet/domain",
   "version": "0.0.0",
   "private": true,
   "type": "module",

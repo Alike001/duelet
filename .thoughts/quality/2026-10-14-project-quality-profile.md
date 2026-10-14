@@ -1,4 +1,4 @@
-# Project Quality Profile: ArcInvoiceStream
+# Project Quality Profile: Duelet
 
 ## Detected stack
 
@@ -17,18 +17,19 @@
 - `npm run secret:scan`
 - `git diff --check`
 
-`npm run check` composes the complete gate. Phase 0 Foundry tests correctly
-report zero tests because production Solidity is intentionally absent.
+`npm run check` composes the complete local gate. The real-USDC fork suite must
+also pass under the pinned Arc Foundry release and `FOUNDRY_PROFILE=arc`.
 
 ## Required CI gates
 
-GitHub Actions uses the pinned Node major and Foundry release, installs from the
-lockfile, and runs the same `npm run check` command. CI never receives a
+GitHub Actions uses the pinned Node major and Circle Arc Foundry release,
+verifies the tool archive checksum, installs from the lockfile, runs
+`npm run check`, and exercises the public-RPC fork suite. CI never receives a
 deployment private key.
 
 ## Suggested local hooks
 
-No hook manager is installed in Phase 0. Before committing, run `npm run check`.
+No hook manager is installed. Before committing, run `npm run check`.
 CI is authoritative; a future lightweight pre-commit hook may run formatting,
 secret scanning, and `git diff --check` without bypassing CI.
 
@@ -40,21 +41,25 @@ secret scanning, and `git diff --check` without bypassing CI.
 - Excluded: generated files, lockfiles, build output, fixtures, vendored code,
   and long-form research/specification documents.
 
+The 311-line unit-test file is an accepted Phase 1 exception: it is test code,
+contains 21 small named cases plus event declarations, and has no production
+logic. The production contract remains below 300 lines.
+
 ## Commit policy
 
 Use Conventional Commits. The Phase 0 commit is
 `chore: establish Arc invoice streaming workspace`.
 
-## Security gates for Phase 1
+## Security gates
 
 - Unit, fuzz, stateful invariant, reentrancy, permission, failure-token, and Arc
   fork tests.
 - Contract-size and gas reports from real compiled artifacts.
-- Static analysis and independent review before deployment approval.
+- Static analysis and independent review remain deployment-readiness gates.
 - No mainnet scripts may broadcast by default.
 
 ## Open questions
 
-- Exact compiled gas remains unknown until Phase 1 source exists.
 - The final deployment tool and explorer verification path require a dry run.
-- Static-analysis tooling should be selected only after the contract exists.
+- Wallet-specific gas simulation must be repeated immediately before approval.
+- A professional security audit has not occurred.

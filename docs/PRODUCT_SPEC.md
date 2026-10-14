@@ -1,14 +1,15 @@
-# Product specification: ArcInvoiceStream
+# Product specification: Duelet
 
 Status: Phase 0 specification lock
 
-Target contract: `ArcInvoiceStream.sol`
+Target contract: `DueletStream.sol`
 
-Production implementation status: not started
+Production implementation status: implemented and tested locally in Phase 1;
+not deployed
 
 ## Objective
 
-ArcInvoiceStream is an independent Arc-native escrow for fixed-amount USDC
+Duelet is an independent Arc-native escrow for fixed-amount USDC
 invoices that vest linearly over an immutable time window. It combines a
 Request-style unique payment reference with a Sablier Lockup-style fully funded
 stream. Our contract, rather than a third-party streaming deployment, will own
@@ -48,7 +49,7 @@ reconciliation accounting.
 - A merchant or service provider shares an invoice proof page whose payment,
   vesting, claims, and cancellation can be reconciled directly on Arc.
 
-ArcInvoiceStream V1 is not payroll automation, recurring billing, credit,
+Duelet V1 is not payroll automation, recurring billing, credit,
 lending, yield generation, arbitration, or conditional milestone escrow.
 
 ## Invoice identity
@@ -134,6 +135,10 @@ that value is zero. Calling before maturity produces a partial stream payout;
 calling at or after maturity produces a full remaining payout. V1 intentionally
 has no caller-selected withdrawal amount.
 
+Every payout verifies both the contract's exact balance decrease and the
+recipient's exact balance increase. A token behavior that short-pays either a
+claim or refund reverts the complete state transition.
+
 Anyone may call it because permissionless triggering improves recovery and does
 not expand spending authority. Payee-only withdrawal would force the payee to
 obtain Arc gas even when the payer is already funded. Permissionless triggering
@@ -174,6 +179,17 @@ must not define balances or entitlements.
 6. Expose sufficient views and events for independent reconciliation.
 7. Include no fees, proxy, governance, token, arbitrary admin withdrawal,
    StableFX, or external streaming dependency.
+
+## Implemented contract surface
+
+Phase 1 implements `createAndFund`, `withdraw`, `cancel`, `vestedAmount`,
+`claimableAmount`, `refundableAmount`, `getInvoice`, deterministic ID
+calculation, derived invoice status, per-invoice liability, aggregate liability,
+solvency, and surplus views. `InvoiceCreated`, `FundsWithdrawn`, and
+`InvoiceCanceled` provide reconciliation evidence.
+
+The complete signatures, event fields, terminology, and frontend-independent
+recovery path are documented in [CONTRACT_API.md](./CONTRACT_API.md).
 
 ## Honest limitations
 

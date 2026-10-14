@@ -112,7 +112,9 @@ emit InvoiceCanceled(...)
 ```
 
 Because cancellation is rejected at or after maturity, `refund` is positive for
-a valid cancellation. A failed transfer reverts the timestamp and accounting.
+a valid cancellation. Both the escrow decrease and recipient increase must
+equal the requested transfer. A failed or short-paying transfer reverts the
+timestamp and accounting.
 
 ## Monetary invariants
 
@@ -179,13 +181,17 @@ recovery.
 ```text
 totalAmount = 10,000 base units
 duration = 180 seconds
-elapsed = 60 seconds
 
+at elapsed 18 seconds:
+vestedAmount = floor(10,000 * 18 / 180) = 1,000
+withdraw full current claimable = 1,000
+
+at elapsed 60 seconds:
 vestedAmount = floor(10,000 * 60 / 180) = 3,333
 unvestedAmount = 10,000 - 3,333 = 6,667
 ```
 
-After a claim of 1,000 units, cancellation at exactly 60 seconds yields:
+Cancellation at exactly 60 seconds then yields:
 
 ```text
 withdrawn before cancellation = 1,000
@@ -193,6 +199,7 @@ refunded to payer = 6,667
 remaining payee entitlement = 3,333 - 1,000 = 2,333
 final withdrawn total = 1,000 + 2,333 = 3,333
 final accounting = 3,333 + 6,667 = 10,000
+final remaining liability = 0
 ```
 
 These are ERC-20 base units: `10,000` is `0.010000 USDC`, not ten thousand
