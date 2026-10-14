@@ -12,4 +12,4 @@ export const PRODUCT = {
   description: 'Invoice-linked USDC streaming escrow on Arc.',
 } as const;
 
-export const PHASE = 'smart-contract-implemented' as const;
+export const PHASE = 'application-implemented-not-deployed' as const;

@@ -8,7 +8,8 @@
     "format": "forge fmt",
     "format:check": "forge fmt --check",
     "lint": "forge lint --deny warnings",
-    "test": "forge test"
+    "test": "forge test",
+    "test:arc-fork": "arc-forge test --fork-url \"$ARC_MAINNET_RPC_URL\" --match-path test/DueletStream.Fork.t.sol"
   },
   "dependencies": {
     "@openzeppelin/contracts": "5.6.1"

@@ -1,0 +1,139 @@
+export const dueletAbi = [
+  {
+    type: 'function',
+    name: 'createAndFund',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'referenceHash', type: 'bytes32' },
+      { name: 'payee', type: 'address' },
+      { name: 'totalAmount', type: 'uint256' },
+      { name: 'requestedStartTime', type: 'uint64' },
+      { name: 'endTime', type: 'uint64' },
+      { name: 'metadataHash', type: 'bytes32' },
+    ],
+    outputs: [{ name: 'invoiceId', type: 'bytes32' }],
+  },
+  {
+    type: 'function',
+    name: 'withdraw',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: 'invoiceId', type: 'bytes32' }],
+    outputs: [{ name: 'amount', type: 'uint256' }],
+  },
+  {
+    type: 'function',
+    name: 'cancel',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: 'invoiceId', type: 'bytes32' }],
+    outputs: [{ name: 'refund', type: 'uint256' }],
+  },
+  {
+    type: 'function',
+    name: 'getInvoice',
+    stateMutability: 'view',
+    inputs: [{ name: 'invoiceId', type: 'bytes32' }],
+    outputs: [
+      {
+        name: '',
+        type: 'tuple',
+        components: [
+          { name: 'payer', type: 'address' },
+          { name: 'payee', type: 'address' },
+          { name: 'totalAmount', type: 'uint256' },
+          { name: 'withdrawnAmount', type: 'uint256' },
+          { name: 'refundedAmount', type: 'uint256' },
+          { name: 'startTime', type: 'uint64' },
+          { name: 'endTime', type: 'uint64' },
+          { name: 'canceledAt', type: 'uint64' },
+          { name: 'metadataHash', type: 'bytes32' },
+        ],
+      },
+    ],
+  },
+  ...[
+    'vestedAmount',
+    'claimableAmount',
+    'refundableAmount',
+    'invoiceLiability',
+  ].map((name) => ({
+    type: 'function' as const,
+    name,
+    stateMutability: 'view' as const,
+    inputs: [{ name: 'invoiceId', type: 'bytes32' as const }],
+    outputs: [{ name: '', type: 'uint256' as const }],
+  })),
+  {
+    type: 'function',
+    name: 'invoiceStatus',
+    stateMutability: 'view',
+    inputs: [{ name: 'invoiceId', type: 'bytes32' }],
+    outputs: [{ name: '', type: 'uint8' }],
+  },
+  {
+    type: 'event',
+    name: 'InvoiceCreated',
+    inputs: [
+      { name: 'invoiceId', type: 'bytes32', indexed: true },
+      { name: 'payer', type: 'address', indexed: true },
+      { name: 'payee', type: 'address', indexed: true },
+      { name: 'referenceHash', type: 'bytes32', indexed: false },
+      { name: 'totalAmount', type: 'uint256', indexed: false },
+      { name: 'startTime', type: 'uint64', indexed: false },
+      { name: 'endTime', type: 'uint64', indexed: false },
+      { name: 'metadataHash', type: 'bytes32', indexed: false },
+    ],
+  },
+  {
+    type: 'event',
+    name: 'FundsWithdrawn',
+    inputs: [
+      { name: 'invoiceId', type: 'bytes32', indexed: true },
+      { name: 'caller', type: 'address', indexed: true },
+      { name: 'payee', type: 'address', indexed: true },
+      { name: 'amount', type: 'uint256', indexed: false },
+      { name: 'totalWithdrawn', type: 'uint256', indexed: false },
+    ],
+  },
+  {
+    type: 'event',
+    name: 'InvoiceCanceled',
+    inputs: [
+      { name: 'invoiceId', type: 'bytes32', indexed: true },
+      { name: 'payer', type: 'address', indexed: true },
+      { name: 'payee', type: 'address', indexed: true },
+      { name: 'canceledAt', type: 'uint64', indexed: false },
+      { name: 'vestedAmount', type: 'uint256', indexed: false },
+      { name: 'refundedAmount', type: 'uint256', indexed: false },
+    ],
+  },
+] as const;
+
+export const erc20Abi = [
+  {
+    type: 'function',
+    name: 'balanceOf',
+    stateMutability: 'view',
+    inputs: [{ name: 'account', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
+    type: 'function',
+    name: 'allowance',
+    stateMutability: 'view',
+    inputs: [
+      { name: 'owner', type: 'address' },
+      { name: 'spender', type: 'address' },
+    ],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
+    type: 'function',
+    name: 'approve',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'spender', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    outputs: [{ name: '', type: 'bool' }],
+  },
+] as const;

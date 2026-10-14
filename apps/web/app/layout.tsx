@@ -1,11 +1,17 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
+import { Providers } from '@/components/providers';
+
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Duelet — Invoice once. Pay over time.',
-  description: 'Invoice-linked USDC streaming escrow on Arc.',
+  title: {
+    default: 'Duelet — Invoice once. Pay over time.',
+    template: '%s · Duelet',
+  },
+  description:
+    'Create a USDC invoice, fund its payment schedule, and let recipients claim what they have earned over time.',
 };
 
 export default function RootLayout({
@@ -13,7 +19,9 @@ export default function RootLayout({
 }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

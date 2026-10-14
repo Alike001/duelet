@@ -23,8 +23,10 @@
 /docs
 ```
 
-Only the rebranded Phase 1 placeholder home page exists today. These routes
-describe the approved future product surface; they are not implemented claims.
+Phase 2 implements every route below in explicit preview mode. Contract reads,
+event discovery, transaction simulation, and writes activate only when a valid
+verified deployment address and deployment block are supplied through public
+configuration. No mainnet deployment is claimed.
 
 ## `/` — landing page
 

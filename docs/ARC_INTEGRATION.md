@@ -78,7 +78,14 @@ Arc uses execution-layer precompiles for native USDC transfer and blocklist
 checks. Upstream Foundry can read the forked proxy but cannot execute those
 precompiles. The integration suite therefore uses Circle's official Arc Foundry
 `v0.8.0-2`, installed with its published SHA-256 verified, and
-`FOUNDRY_PROFILE=arc`.
+`FOUNDRY_PROFILE=arc`. The Arc execution mode must be selected with the
+`--fork-url` command-line flag. Supplying the RPC only to a Solidity
+`vm.createSelectFork` call is insufficient: the generic EVM runner then reaches
+Arc's blocklist precompile as an unsupported opcode. The reproducible command is:
+
+```bash
+ARC_MAINNET_RPC_URL=https://rpc.mainnet.arc.io npm run test:arc-fork --workspace @duelet/contracts
+```
 
 On October 14, 2026, that suite passed against the live mainnet RPC with the
 real USDC proxy and implementation: local-only balance funding, approval,

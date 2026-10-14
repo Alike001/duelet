@@ -14,13 +14,15 @@ or route funds through Request Network or Sablier contracts.
 
 ## Current phase
 
-Phase 1 implements and tests the Solidity financial mechanism. The web package
-remains a deliberately small placeholder; wallet flows and the production UI
-are Phase 2 work. Nothing in this repository has been deployed to mainnet.
+Phase 2 implements the complete product application around the tested Solidity
+mechanism: invoice creation, wallet and chain checks, contract reads,
+transaction preparation, event discovery, lifecycle actions, and independent
+proof. It remains in explicit preview mode because nothing in this repository
+has been deployed to mainnet.
 
 ## Workspace
 
-- `apps/web` — future Next.js product application.
+- `apps/web` — Next.js product application and browser tests.
 - `contracts` — Foundry contract, mocks, unit, fuzz, invariant, adversarial, and
   Arc fork tests.
 - `packages/domain` — strict TypeScript configuration and shared fixture checks.

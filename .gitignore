@@ -5,6 +5,8 @@ out/
 cache/
 coverage/
 broadcast/
+apps/web/test-results/
+apps/web/playwright-report/
 
 .env
 .env.*
