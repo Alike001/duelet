@@ -21,13 +21,14 @@ The application provides invoice creation, payer/payee views, live entitlement,
 cancellation previews, confirmed activity and a shareable proof page that
 reconciles deposit = withdrawn + refunded + remaining liability.
 
-Status: implementation and release-hardening complete; unaudited and not yet
-deployed. Mainnet link, repository URL, contract address and transaction proof
-will be added only after the minimal 0.010000 USDC canary is confirmed.
+Status: implementation and release-hardening complete; public source and preview
+application available. The contract is unaudited and not yet deployed. Contract
+address and transaction proof will be added only after the minimal 0.010000 USDC
+canary is confirmed.
 
 ## Submission placeholders
 
-- Live application: **PENDING**
+- Live application: https://duelet.vercel.app (preview mode; writes disabled)
 - Public repository: https://github.com/Alike001/duelet
 - Builder profile: **PENDING**
 - Contract address: **PENDING**

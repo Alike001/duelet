@@ -14,7 +14,7 @@ mode and all writes remain locked until a configured Arc deployment matches the
 approved runtime bytecode and immutable USDC address. The contracts are
 unaudited.
 
-- **Application:** public preview deployment pending
+- **Application:** [duelet.vercel.app](https://duelet.vercel.app) — preview mode
 - **Source:** [github.com/Alike001/duelet](https://github.com/Alike001/duelet)
 
 ## The payment problem
@@ -104,7 +104,8 @@ No broadcast is authorized by this repository. Follow
 real deployment, reviewers should verify the chain, receipt, runtime code hash,
 `USDC()` immutable, invoice events, current state and `/proof/[id]` accounting.
 
-The public application URL and contract address remain intentionally blank.
+The public application is live in preview mode. The contract address remains
+intentionally blank until a verified Arc mainnet deployment exists.
 
 ## Preview demonstration
 

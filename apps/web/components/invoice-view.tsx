@@ -220,18 +220,18 @@ export function InvoiceView({
     withdrawReceipt.isSuccess,
   ]);
 
-  if (!preview && deployment.mode === 'preview')
-    return (
-      <Unavailable
-        title="Contract not deployed"
-        body="A real invoice cannot be read until a verified contract address and deployment block are configured. Use the illustrative proof to inspect the complete accounting presentation."
-      />
-    );
   if (!preview && !validId)
     return (
       <Unavailable
         title="Invalid invoice ID"
         body="Invoice IDs are 32-byte hexadecimal values. Check the URL and try again."
+      />
+    );
+  if (!preview && deployment.mode === 'preview')
+    return (
+      <Unavailable
+        title="Contract not deployed"
+        body="A real invoice cannot be read until a verified contract address and deployment block are configured. Use the illustrative proof to inspect the complete accounting presentation."
       />
     );
   if (reads.isPending && !preview)

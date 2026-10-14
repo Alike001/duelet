@@ -92,6 +92,16 @@ test('production routes survive hard refresh without inventing deployment data',
   await expect(page.getByText('Illustrative data')).toBeVisible();
 });
 
+test('dynamic routes reject malformed invoice IDs', async ({ page }) => {
+  for (const route of ['/invoices/not-an-id', '/proof/not-an-id']) {
+    await page.goto(route);
+    await expect(
+      page.getByRole('heading', { name: 'Invalid invoice ID' }),
+    ).toBeVisible();
+    await expect(page.getByText(/32-byte hexadecimal values/)).toBeVisible();
+  }
+});
+
 test('primary navigation and actions have visible keyboard focus', async ({
   page,
 }) => {
