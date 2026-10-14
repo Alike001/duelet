@@ -20,6 +20,11 @@ jobs:
           node-version-file: .node-version
           cache: npm
 
+      - name: Install pinned upstream Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.5
+
       - name: Install pinned Arc Foundry
         env:
           ARC_FOUNDRY_VERSION: v0.8.0-2
@@ -29,9 +34,10 @@ jobs:
           curl -fsSLO "${base}/${archive}"
           curl -fsSLO "${base}/${archive}.sha256"
           sha256sum -c "${archive}.sha256"
-          mkdir -p "${RUNNER_TEMP}/arc-foundry"
+          mkdir -p "${RUNNER_TEMP}/arc-foundry" "${RUNNER_TEMP}/arc-bin"
           tar -xzf "${archive}" -C "${RUNNER_TEMP}/arc-foundry"
-          echo "${RUNNER_TEMP}/arc-foundry" >> "${GITHUB_PATH}"
+          install "${RUNNER_TEMP}/arc-foundry/forge" "${RUNNER_TEMP}/arc-bin/arc-forge"
+          echo "${RUNNER_TEMP}/arc-bin" >> "${GITHUB_PATH}"
 
       - run: npm ci
       - run: npm run check
