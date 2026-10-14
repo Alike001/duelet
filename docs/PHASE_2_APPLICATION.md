@@ -43,7 +43,7 @@ seconds so simulation does not silently reuse a stale schedule.
 ## Event reliability
 
 Event history begins at the configured deployment block, queries public Arc RPC
-logs in 25,000-block ranges, deduplicates by transaction hash and log index, and
+logs in 9,999-block ranges, deduplicates by transaction hash and log index, and
 orders equal-timestamp activity by block and log index. Strict ABI decoding
 excludes malformed logs. RPC failure and incomplete discovery receive explicit
 UI states; contract reads remain the financial source of truth.

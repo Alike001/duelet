@@ -19,7 +19,10 @@ export type DueletActivity = {
 };
 
 const client = createPublicClient({ chain: arc, transport: http() });
-const RANGE = 25_000n;
+// Arc public RPC currently caps eth_getLogs queries at 10,000 blocks.
+// Staying one block below that ceiling leaves the request unambiguous across
+// providers that interpret the limit as an exclusive range.
+export const EVENT_LOG_RANGE = 9_999n;
 const CONFIRMATION_DEPTH = 20n;
 
 export async function loadActivity(): Promise<DueletActivity[]> {
@@ -29,9 +32,15 @@ export async function loadActivity(): Promise<DueletActivity[]> {
   const confirmedLatest = latest - CONFIRMATION_DEPTH;
   const all: DueletActivity[] = [];
 
-  for (let from = deployment.block; from <= confirmedLatest; from += RANGE) {
+  for (
+    let from = deployment.block;
+    from <= confirmedLatest;
+    from += EVENT_LOG_RANGE
+  ) {
     const to =
-      from + RANGE - 1n > confirmedLatest ? confirmedLatest : from + RANGE - 1n;
+      from + EVENT_LOG_RANGE - 1n > confirmedLatest
+        ? confirmedLatest
+        : from + EVENT_LOG_RANGE - 1n;
     const [created, withdrawn, canceled] = await Promise.all([
       client.getContractEvents({
         address: deployment.address,

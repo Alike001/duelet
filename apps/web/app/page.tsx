@@ -10,31 +10,37 @@ export default function HomePage() {
     <PageShell>
       <LandingMotion>
         <section className="hero">
-          <div className="hero-copy">
+          <div className="hero-kicker">
             <p className="eyebrow">USDC invoice streaming on Arc</p>
+            <span>01 / Funded payment infrastructure</span>
+          </div>
+          <div className="hero-copy">
             <h1>
-              Invoice once.
-              <br />
-              <span>Pay over time.</span>
+              Invoice once. <span>Pay over time.</span>
             </h1>
-            <p className="hero-lede">
-              Fund an invoice in USDC on Arc. Payments vest over time,
-              recipients claim earned funds, and unused escrow returns to the
-              payer when a stream is canceled.
-            </p>
-            <div className="hero-actions">
-              <Link className="button button-accent" href="/invoices/new">
-                Create an invoice <ArrowIcon />
-              </Link>
-              <a className="button button-ghost" href="#how-it-works">
-                Explore how it works
-              </a>
+            <div className="hero-intro">
+              <p className="hero-lede">
+                Fund an invoice in USDC on Arc. Payments vest over time,
+                recipients claim earned funds, and unused escrow returns to the
+                payer when a stream is canceled.
+              </p>
+              <div className="hero-actions">
+                <Link className="button button-accent" href="/invoices/new">
+                  Create an invoice <ArrowIcon />
+                </Link>
+                <a className="button button-ghost" href="#how-it-works">
+                  Explore how it works
+                </a>
+              </div>
             </div>
-            <p className="hero-note">
-              Fully funded escrow · Six-decimal accounting · No protocol fees
-            </p>
           </div>
           <StreamDemo />
+          <div className="hero-footnotes" aria-label="Duelet properties">
+            <span>01 Fully funded before creation</span>
+            <span>02 Payee destination is immutable</span>
+            <span>03 Public accounting proof</span>
+            <span>Preview · no contract deployed</span>
+          </div>
         </section>
 
         <section className="marquee" aria-label="Product principles">
