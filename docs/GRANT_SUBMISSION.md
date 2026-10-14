@@ -28,7 +28,7 @@ will be added only after the minimal 0.010000 USDC canary is confirmed.
 ## Submission placeholders
 
 - Live application: **PENDING**
-- Public repository: **PENDING**
+- Public repository: https://github.com/Alike001/duelet
 - Builder profile: **PENDING**
 - Contract address: **PENDING**
 - Mainnet proof invoice: **PENDING**

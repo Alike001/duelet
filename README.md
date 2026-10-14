@@ -4,16 +4,29 @@
 
 **Invoice once. Pay over time.**
 
-Duelet is an invoice-linked USDC streaming escrow for Arc. A payer records an
-invoice reference, deposits the complete payment once, and the immutable payee
-earns that escrow linearly between fixed timestamps. Before maturity, the payer
-can cancel future vesting: unvested USDC returns immediately while every earned
-unit remains claimable.
+Duelet enables businesses to fund USDC invoices upfront on Arc while recipients
+earn payments over time and claim vested funds. If a payer cancels an active
+stream, the contract returns unvested USDC while preserving the recipient's
+earned entitlement.
 
 Duelet is currently **not deployed**. The application runs in explicit preview
 mode and all writes remain locked until a configured Arc deployment matches the
 approved runtime bytecode and immutable USDC address. The contracts are
 unaudited.
+
+- **Application:** public preview deployment pending
+- **Source:** [github.com/Alike001/duelet](https://github.com/Alike001/duelet)
+
+## The payment problem
+
+Traditional invoices are usually all-or-nothing: the payer either holds the
+entire payment until a due date or releases everything before work is complete.
+That leaves both sides tracking what has been earned and what should be returned
+if an engagement ends early.
+
+Duelet turns one fully funded invoice into a verifiable payment timeline. The
+escrow contract, rather than either party or the interface, calculates earned,
+claimable, refundable, and outstanding balances.
 
 ## Financial mechanism
 
@@ -92,6 +105,20 @@ real deployment, reviewers should verify the chain, receipt, runtime code hash,
 `USDC()` immutable, invoice events, current state and `/proof/[id]` accounting.
 
 The public application URL and contract address remain intentionally blank.
+
+## Preview demonstration
+
+1. Open the application without connecting a wallet and inspect the labeled
+   illustrative stream in the hero.
+2. Visit `/invoices/new` to review the exact approval, funding, vesting, and
+   cancellation terms. Preview mode cannot prepare a live write.
+3. Open `/proof/preview` to verify the deterministic accounting identity.
+4. Review `/docs` for direct-contract recovery, trust assumptions, and known
+   limitations.
+
+After a verified Arc deployment, the same interface switches to confirmed
+contract state and event evidence only after the runtime hash, immutable USDC
+address, chain, and deployment block all pass the documented release checks.
 
 ## Security and limitations
 

@@ -105,9 +105,16 @@ export default function DocsPage() {
           <section>
             <h2>Source and deployment evidence</h2>
             <p>
-              The public repository link and verified deployment receipt will be
-              added only when they actually exist. No mainnet deployment is
-              claimed in Phase 2.
+              The source is public on{' '}
+              <a
+                href="https://github.com/Alike001/duelet"
+                target="_blank"
+                rel="noreferrer"
+              >
+                GitHub
+              </a>
+              . A verified deployment receipt will be added only when it
+              actually exists. No mainnet deployment is claimed in preview mode.
             </p>
             <div className="docs-actions">
               <Link className="button button-dark" href="/proof/preview">

@@ -9,7 +9,13 @@ export function SiteFooter() {
       </div>
       <div className="footer-links">
         <Link href="/docs">Documentation</Link>
-        <span>Source link pending</span>
+        <a
+          href="https://github.com/Alike001/duelet"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Source code
+        </a>
         <span>Unaudited software</span>
       </div>
       <p className="footer-legal">
