@@ -5,6 +5,10 @@ type ProviderFlags = {
   isCoinbaseWallet?: boolean;
 };
 
+export function isValidReownProjectId(value: string | undefined): boolean {
+  return /^[a-f0-9]{32}$/i.test(value?.trim() ?? '');
+}
+
 export function walletDisplayName(
   connectorName: string,
   provider: unknown,
@@ -51,6 +55,10 @@ export function walletErrorMessage(
 
   if (/already pending|request.*pending/i.test(detail)) {
     return 'A wallet request is already open. Complete or cancel it in your wallet.';
+  }
+
+  if (/expired|session.*(closed|deleted)|pairing.*expired/i.test(detail)) {
+    return 'The wallet session expired. Start a new connection and scan the new QR code.';
   }
 
   return action === 'switch'

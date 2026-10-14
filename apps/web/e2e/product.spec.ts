@@ -212,10 +212,29 @@ test('wallet sheet explains connection choices without weakening preview mode', 
   ).toBeVisible();
   await expect(page.getByText('No browser wallet detected')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Get MetaMask' })).toBeVisible();
-  await expect(page.getByText(/WalletConnect QR/)).toHaveCount(0);
+  await expect(
+    page.getByRole('button', { name: /WalletConnect/ }),
+  ).toBeVisible();
   await expect(page.getByText(/Wagmi|Reown/)).toHaveCount(0);
   await expect(page.getByText(/payments are disabled/i)).toBeVisible();
   await captureEvidence(page, 'wallet-selection-modal');
+});
+
+test('WalletConnect initializes a genuine responsive session', async ({
+  page,
+}, testInfo) => {
+  await page.goto('/');
+  await page.locator('header .wallet-trigger').click();
+  await page.getByRole('button', { name: /WalletConnect/ }).click();
+  await expect(page.locator('.wallet-dialog')).not.toBeVisible();
+  await expect(page.locator('w3m-modal')).toBeVisible({ timeout: 15_000 });
+  if (testInfo.project.name === 'mobile-chrome') {
+    await expect(page.getByRole('alertdialog')).toBeVisible();
+    await expect(page.getByRole('button', { name: /MetaMask/ })).toBeVisible();
+  } else {
+    await expect(page.locator('wui-qr-code')).toBeVisible({ timeout: 15_000 });
+  }
+  await captureEvidence(page, 'walletconnect-qr');
 });
 
 test('EIP-6963 discovery presents multiple real browser wallets once', async ({

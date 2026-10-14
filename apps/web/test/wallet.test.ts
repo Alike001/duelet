@@ -4,9 +4,18 @@ import {
   walletDisplayName,
   walletErrorMessage,
   walletIdentityKey,
+  isValidReownProjectId,
 } from '@/lib/wallet';
 
 describe('wallet presentation', () => {
+  it('enables WalletConnect only for a complete public project ID', () => {
+    expect(isValidReownProjectId(undefined)).toBe(false);
+    expect(isValidReownProjectId('')).toBe(false);
+    expect(isValidReownProjectId('not-a-project-id')).toBe(false);
+    expect(isValidReownProjectId('e411b002ae19ad7b17f86b74b6979f0b')).toBe(
+      true,
+    );
+  });
   it('identifies common injected providers without renaming EIP-6963 wallets', () => {
     expect(walletDisplayName('Injected', { isMetaMask: true })).toBe(
       'MetaMask',
@@ -39,6 +48,9 @@ describe('wallet presentation', () => {
     ).toMatch(/already open/);
     expect(walletErrorMessage(new Error('private RPC detail'))).not.toMatch(
       /private RPC detail/,
+    );
+    expect(walletErrorMessage(new Error('Pairing expired'))).toMatch(
+      /session expired/,
     );
   });
 });

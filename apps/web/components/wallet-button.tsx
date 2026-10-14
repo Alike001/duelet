@@ -123,6 +123,8 @@ export function WalletButton() {
   function connectWallet(connector: Connector) {
     setMessage('');
     setPendingConnectorUid(connector.uid);
+    const usesQrModal = connector.type === 'walletConnect';
+    if (usesQrModal) closeWallet();
     connect(
       { connector, chainId: ARC_CHAIN_ID },
       {
@@ -132,6 +134,10 @@ export function WalletButton() {
         },
         onError: (error) => {
           setPendingConnectorUid(undefined);
+          if (usesQrModal) {
+            setView('connect');
+            dialog.current?.showModal();
+          }
           setMessage(walletErrorMessage(error));
         },
       },
@@ -147,6 +153,9 @@ export function WalletButton() {
 
   const isConnected = connection.status === 'connected';
   const wrongNetwork = isConnected && connection.chainId !== ARC_CHAIN_ID;
+  const browserWalletAvailable = availableWallets.some(
+    ({ connector }) => connector.type !== 'walletConnect',
+  );
   const formattedGas = gasBalance.data
     ? formatNativeBalance(gasBalance.data.value)
     : '—';
@@ -213,65 +222,70 @@ export function WalletButton() {
               <div className="wallet-options">
                 {checkingWallets ? (
                   <div className="wallet-detection">Checking this browser…</div>
-                ) : availableWallets.length ? (
-                  availableWallets.map(({ connector, icon, name }) => (
-                    <button
-                      type="button"
-                      onClick={() => connectWallet(connector)}
-                      disabled={isPending}
-                      key={connector.uid}
-                    >
-                      <span className="wallet-option-mark" aria-hidden="true">
-                        {icon ? (
-                          <Image
-                            alt=""
-                            height={40}
-                            src={icon}
-                            unoptimized
-                            width={40}
-                          />
-                        ) : (
-                          name.slice(0, 1).toUpperCase()
-                        )}
-                      </span>
-                      <span>
-                        <strong>
-                          {isPending && pendingConnectorUid === connector.uid
-                            ? 'Check your wallet'
-                            : name}
-                        </strong>
-                        <small>
-                          {isPending && pendingConnectorUid === connector.uid
-                            ? 'Approve or cancel the request there'
-                            : 'Detected in this browser'}
-                        </small>
-                      </span>
-                      <b>→</b>
-                    </button>
-                  ))
                 ) : (
-                  <div className="no-wallet-state">
-                    <strong>No browser wallet detected</strong>
-                    <p>
-                      Install a browser wallet such as MetaMask, or open Duelet
-                      inside your mobile wallet&apos;s browser.
-                    </p>
-                    <div className="no-wallet-actions">
-                      <a
-                        href="https://metamask.io/download/"
-                        rel="noreferrer"
-                        target="_blank"
-                      >
-                        Get MetaMask
-                      </a>
+                  <>
+                    {availableWallets.map(({ connector, icon, name }) => (
                       <button
                         type="button"
-                        onClick={() => void discoverWallets()}
+                        onClick={() => connectWallet(connector)}
+                        disabled={isPending}
+                        key={connector.uid}
                       >
-                        Check again
+                        <span className="wallet-option-mark" aria-hidden="true">
+                          {icon ? (
+                            <Image
+                              alt=""
+                              height={40}
+                              src={icon}
+                              unoptimized
+                              width={40}
+                            />
+                          ) : (
+                            name.slice(0, 1).toUpperCase()
+                          )}
+                        </span>
+                        <span>
+                          <strong>
+                            {isPending && pendingConnectorUid === connector.uid
+                              ? 'Check your wallet'
+                              : name}
+                          </strong>
+                          <small>
+                            {isPending && pendingConnectorUid === connector.uid
+                              ? 'Approve or cancel the request there'
+                              : connector.type === 'walletConnect'
+                                ? 'Scan a QR code or use a mobile wallet'
+                                : 'Detected in this browser'}
+                          </small>
+                        </span>
+                        <b>→</b>
                       </button>
-                    </div>
-                  </div>
+                    ))}
+                    {!browserWalletAvailable && (
+                      <div className="no-wallet-state">
+                        <strong>No browser wallet detected</strong>
+                        <p>
+                          Install MetaMask, use WalletConnect, or open Duelet
+                          inside your mobile wallet&apos;s browser.
+                        </p>
+                        <div className="no-wallet-actions">
+                          <a
+                            href="https://metamask.io/download/"
+                            rel="noreferrer"
+                            target="_blank"
+                          >
+                            Get MetaMask
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => void discoverWallets()}
+                          >
+                            Check again
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
               <p className="wallet-note">
