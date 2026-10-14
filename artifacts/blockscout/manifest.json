@@ -1,0 +1,29 @@
+{
+  "status": "PREPARED_NOT_DEPLOYED",
+  "chainId": 5042,
+  "contract": "src/DueletStream.sol:DueletStream",
+  "contractSourceGitBlob": "986cdcf98995998e60ea7b1acb1d1a4923b02e1b",
+  "compiler": "0.8.37",
+  "evmVersion": "osaka",
+  "optimizer": {
+    "enabled": true,
+    "runs": 200
+  },
+  "constructor": {
+    "type": "address",
+    "value": "0x3600000000000000000000000000000000000000",
+    "abiEncoding": "0x0000000000000000000000003600000000000000000000000000000000000000"
+  },
+  "sizes": {
+    "creationBytecodeBytes": 6603,
+    "deploymentInputBytes": 6635,
+    "expectedRuntimeBytes": 6216
+  },
+  "hashes": {
+    "creationBytecodeKeccak256": "0x12947aaa71d70faca733cc0a04a7f1a1c2f07df782f22e1f7cf89ec1239f99e2",
+    "deploymentInputKeccak256": "0xb367394f497b3c3b939cde50b967e81e190a5ea8a96c5af07233adde4c87eba8",
+    "expectedRuntimeKeccak256": "0xf4ad4b494fd7d609868ae5737d5840ee903b001767718cba4f249309ff84606f",
+    "standardInputSha256": "0x34eeb5ef8c0199cc9050e8ea2d80f6591d0a8a4096acbb5b780408fc1d33f0e4"
+  },
+  "immutableReferenceCount": 11
+}

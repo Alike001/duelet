@@ -23,13 +23,23 @@ const client = createPublicClient({ chain: arc, transport: http() });
 // Staying one block below that ceiling leaves the request unambiguous across
 // providers that interpret the limit as an exclusive range.
 export const EVENT_LOG_RANGE = 9_999n;
-const CONFIRMATION_DEPTH = 20n;
+// Arc blocks are deterministically final when committed. Its official indexer
+// guidance explicitly removes confirmation-depth delays, so finalized event
+// discovery can include the current committed head.
+export const EVENT_CONFIRMATION_DEPTH = 0n;
+
+export function eventUpperBound(
+  latest: bigint,
+  deploymentBlock: bigint,
+): bigint | undefined {
+  return latest < deploymentBlock ? undefined : latest;
+}
 
 export async function loadActivity(): Promise<DueletActivity[]> {
   if (!deployment.address || deployment.block === undefined) return [];
   const latest = await client.getBlockNumber();
-  if (latest < deployment.block + CONFIRMATION_DEPTH) return [];
-  const confirmedLatest = latest - CONFIRMATION_DEPTH;
+  const confirmedLatest = eventUpperBound(latest, deployment.block);
+  if (confirmedLatest === undefined) return [];
   const all: DueletActivity[] = [];
 
   for (

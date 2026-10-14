@@ -29,6 +29,25 @@ arc-cast abi-encode 'constructor(address)' \
   0x3600000000000000000000000000000000000000
 ```
 
+## Reproducible verification bundle
+
+Run `npm run release:verification-bundle` from the repository root. The
+checked-in bundle at `artifacts/blockscout/` contains:
+
+- exact Standard JSON compiler input with all source contents;
+- constructor ABI encoding;
+- creation bytecode and complete deployment input;
+- constructor-patched expected runtime bytecode; and
+- a machine-readable size and hash manifest.
+
+The prepared manifest commits to creation bytecode hash
+`0x12947aaa71d70faca733cc0a04a7f1a1c2f07df782f22e1f7cf89ec1239f99e2`,
+complete deployment-input hash
+`0xb367394f497b3c3b939cde50b967e81e190a5ea8a96c5af07233adde4c87eba8`,
+and expected Arc runtime hash
+`0xf4ad4b494fd7d609868ae5737d5840ee903b001767718cba4f249309ff84606f`.
+Regenerate and compare the bundle from the final merged commit before signing.
+
 ## Preferred Blockscout submission
 
 Arc's explorer is a Blockscout deployment at <https://explorer.arc.io/>. After
@@ -39,8 +58,8 @@ mainnet runbook:
    publish**.
 2. Prefer Standard JSON verification so every imported OpenZeppelin source,
    remapping, optimizer setting, EVM target, and metadata setting is explicit.
-3. Generate the Standard JSON input from the exact clean release checkout and
-   retain it as release evidence. Do not edit flattened source to make it pass.
+3. Use `artifacts/blockscout/standard-input.json` regenerated from the exact
+   clean release checkout. Do not edit flattened source to make it pass.
 4. Select Solidity `0.8.37`, optimizer enabled with `200` runs, and Osaka.
 5. Supply the constructor ABI encoding above without a second `0x` prefix if
    the form adds one.

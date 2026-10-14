@@ -4,7 +4,11 @@ import { dueletAbi } from '@/lib/abi';
 import { ARC_CHAIN_ID, ARC_USDC_ADDRESS, deployment } from '@/lib/chain';
 import { DUELET_ARC_RUNTIME_CODEHASH } from '@/lib/chain';
 import { deploymentIdentityMatches } from '@/lib/deployment-verification';
-import { EVENT_LOG_RANGE } from '@/lib/events';
+import {
+  EVENT_CONFIRMATION_DEPTH,
+  EVENT_LOG_RANGE,
+  eventUpperBound,
+} from '@/lib/events';
 
 describe('Arc and ABI integration', () => {
   it('uses verified Arc configuration and explicit preview mode', () => {
@@ -62,5 +66,11 @@ describe('Arc and ABI integration', () => {
   it('keeps event discovery within the Arc public RPC log limit', () => {
     expect(EVENT_LOG_RANGE).toBe(9_999n);
     expect(EVENT_LOG_RANGE).toBeLessThanOrEqual(10_000n);
+  });
+
+  it('indexes Arc committed blocks without an Ethereum-style confirmation lag', () => {
+    expect(EVENT_CONFIRMATION_DEPTH).toBe(0n);
+    expect(eventUpperBound(5_042n, 5_042n)).toBe(5_042n);
+    expect(eventUpperBound(5_041n, 5_042n)).toBeUndefined();
   });
 });
