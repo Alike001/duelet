@@ -802,8 +802,23 @@ button:disabled {
   cursor: pointer;
 }
 @media (max-width: 900px) {
+  .site-header {
+    flex-wrap: wrap;
+  }
   .site-header nav {
+    order: 3;
+    width: 100%;
+    padding: 8px 2px 2px;
+    border-top: 1px solid var(--line);
+    gap: 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .site-header nav::-webkit-scrollbar {
     display: none;
+  }
+  .site-header nav a {
+    flex: 0 0 auto;
   }
   .page-content {
     padding-inline: 18px;

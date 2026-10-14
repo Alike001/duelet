@@ -117,3 +117,24 @@ test('primary navigation and actions have visible keyboard focus', async ({
   });
   expect(focusStyle).not.toBe('none:0px:none');
 });
+
+test('primary navigation remains available on compact screens', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  const navigation = page.getByRole('navigation', {
+    name: 'Primary navigation',
+  });
+  await expect(navigation).toBeVisible();
+  await expect(
+    navigation.getByRole('link', { name: 'Workspace' }),
+  ).toBeVisible();
+  await expect(
+    navigation.getByRole('link', { name: 'Invoices' }),
+  ).toBeVisible();
+  await expect(
+    navigation.getByRole('link', { name: 'Activity' }),
+  ).toBeVisible();
+  await expect(navigation.getByRole('link', { name: 'Docs' })).toBeVisible();
+});
