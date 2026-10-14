@@ -22,6 +22,10 @@ That grant does not relicense third-party software. In particular:
   must continue to be used under their own terms.
 - Other npm packages retain the exact declared licenses inventoried below and
   their notices in the installed packages.
+- Reown AppKit and WalletConnect were evaluated but are not installed. The
+  candidate WalletConnect Ethereum provider uses the WalletConnect Community
+  License Agreement rather than MIT; acceptance and notice requirements must
+  be resolved before adding it. See `docs/WALLET_INTEGRATION.md`.
 - Research references to Request Network and Sablier describe public financial
   behavior. No Request, Sablier, Helio, Peridot, AutoRange, or other reviewed
   product source is included in Duelet's project-authored implementation.

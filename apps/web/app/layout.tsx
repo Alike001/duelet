@@ -1,9 +1,21 @@
 import type { Metadata } from 'next';
+import { Instrument_Serif, Manrope } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { Providers } from '@/components/providers';
 
 import './globals.css';
+
+const display = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-display',
+});
+
+const sans = Manrope({
+  subsets: ['latin'],
+  variable: '--font-sans',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -19,7 +31,7 @@ export default function RootLayout({
 }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
-      <body>
+      <body className={`${display.variable} ${sans.variable}`}>
         <Providers>{children}</Providers>
       </body>
     </html>

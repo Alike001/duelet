@@ -35,55 +35,74 @@ export function StreamDemo() {
         <div>
           <span className="preview-dot" /> Illustrative demo
         </div>
-        <span>Streaming</span>
+        <span>Live calculation · {elapsed.toString()} / 180 seconds</span>
       </div>
-      <div className="invoice-title">
-        <p>Design services · DUE-0042</p>
-        <h2>
-          0.010000 <small>USDC</small>
-        </h2>
-      </div>
-      <div className="address-row">
-        <div>
-          <span>Payer</span>
-          <strong>0x7A4c…d9D1</strong>
+      <div className="stream-demo-grid">
+        <div className="stream-demo-primary">
+          <div className="invoice-title">
+            <p>Design services · DUE-0042</p>
+            <h2>
+              0.010000 <small>USDC</small>
+            </h2>
+            <span>Fully funded escrow</span>
+          </div>
+          <div className="address-row">
+            <div>
+              <span>Payer</span>
+              <strong>0x7A4c…d9D1</strong>
+            </div>
+            <span className="flow-arrow">→</span>
+            <div>
+              <span>Recipient</span>
+              <strong>0x21aC…6542</strong>
+            </div>
+          </div>
+          <div className="stream-meter">
+            <div className="progress-label">
+              <span>Time elapsed</span>
+              <strong>{progress.toFixed(2)}%</strong>
+            </div>
+            <div className="progress-track">
+              <span style={{ width: `${progress}%` }} />
+              <i style={{ left: `${progress}%` }} />
+            </div>
+            <div className="stream-axis">
+              <span>Funded · 00:00</span>
+              <span>Fully vested · 03:00</span>
+            </div>
+          </div>
         </div>
-        <span className="flow-arrow">→</span>
-        <div>
-          <span>Payee</span>
-          <strong>0x21aC…6542</strong>
-        </div>
-      </div>
-      <div className="progress-label">
-        <span>Vesting progress</span>
-        <strong>{progress.toFixed(2)}%</strong>
-      </div>
-      <div className="progress-track">
-        <span style={{ width: `${progress}%` }} />
-      </div>
-      <div className="demo-metrics">
-        <div>
-          <span>Vested</span>
-          <strong>{formatUsdc(data.vested)}</strong>
-        </div>
-        <div>
-          <span>Claimable</span>
-          <strong>{formatUsdc(data.claimable)}</strong>
-        </div>
-        <div>
-          <span>Unvested</span>
-          <strong>{formatUsdc(data.refundable)}</strong>
-        </div>
-      </div>
-      <div className="cancel-preview">
-        <span>If canceled now</span>
-        <div>
-          <p>
-            Payee keeps <strong>{formatUsdc(data.claimable)} USDC</strong>
-          </p>
-          <p>
-            Payer receives <strong>{formatUsdc(data.refundable)} USDC</strong>
-          </p>
+        <div className="stream-ledger">
+          <p className="eyebrow">Position now</p>
+          <div className="demo-metrics">
+            <div>
+              <span>Vested</span>
+              <strong>{formatUsdc(data.vested)}</strong>
+              <small>USDC</small>
+            </div>
+            <div className="claimable-metric">
+              <span>Claimable</span>
+              <strong>{formatUsdc(data.claimable)}</strong>
+              <small>USDC</small>
+            </div>
+            <div>
+              <span>Still unvested</span>
+              <strong>{formatUsdc(data.refundable)}</strong>
+              <small>USDC</small>
+            </div>
+          </div>
+          <div className="cancel-preview">
+            <span>Cancel at this moment</span>
+            <div>
+              <p>
+                Payee keeps <strong>{formatUsdc(data.claimable)} USDC</strong>
+              </p>
+              <p>
+                Payer receives{' '}
+                <strong>{formatUsdc(data.refundable)} USDC</strong>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
       <p className="demo-foot">

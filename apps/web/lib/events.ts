@@ -19,19 +19,38 @@ export type DueletActivity = {
 };
 
 const client = createPublicClient({ chain: arc, transport: http() });
-const RANGE = 25_000n;
-const CONFIRMATION_DEPTH = 20n;
+// Arc public RPC currently caps eth_getLogs queries at 10,000 blocks.
+// Staying one block below that ceiling leaves the request unambiguous across
+// providers that interpret the limit as an exclusive range.
+export const EVENT_LOG_RANGE = 9_999n;
+// Arc blocks are deterministically final when committed. Its official indexer
+// guidance explicitly removes confirmation-depth delays, so finalized event
+// discovery can include the current committed head.
+export const EVENT_CONFIRMATION_DEPTH = 0n;
+
+export function eventUpperBound(
+  latest: bigint,
+  deploymentBlock: bigint,
+): bigint | undefined {
+  return latest < deploymentBlock ? undefined : latest;
+}
 
 export async function loadActivity(): Promise<DueletActivity[]> {
   if (!deployment.address || deployment.block === undefined) return [];
   const latest = await client.getBlockNumber();
-  if (latest < deployment.block + CONFIRMATION_DEPTH) return [];
-  const confirmedLatest = latest - CONFIRMATION_DEPTH;
+  const confirmedLatest = eventUpperBound(latest, deployment.block);
+  if (confirmedLatest === undefined) return [];
   const all: DueletActivity[] = [];
 
-  for (let from = deployment.block; from <= confirmedLatest; from += RANGE) {
+  for (
+    let from = deployment.block;
+    from <= confirmedLatest;
+    from += EVENT_LOG_RANGE
+  ) {
     const to =
-      from + RANGE - 1n > confirmedLatest ? confirmedLatest : from + RANGE - 1n;
+      from + EVENT_LOG_RANGE - 1n > confirmedLatest
+        ? confirmedLatest
+        : from + EVENT_LOG_RANGE - 1n;
     const [created, withdrawn, canceled] = await Promise.all([
       client.getContractEvents({
         address: deployment.address,

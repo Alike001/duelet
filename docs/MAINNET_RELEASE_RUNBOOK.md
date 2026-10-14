@@ -101,12 +101,17 @@ NEXT_PUBLIC_ARC_RPC_URL=https://rpc.mainnet.arc.io
 NEXT_PUBLIC_ARC_EXPLORER_URL=https://explorer.arc.io
 NEXT_PUBLIC_DUELET_CONTRACT_ADDRESS=<confirmed address>
 NEXT_PUBLIC_DUELET_DEPLOYMENT_BLOCK=<confirmed block>
+NEXT_PUBLIC_REOWN_PROJECT_ID=<optional; does not enable AppKit by itself>
 ```
 
 These are public values, not secrets. Do not configure a private key. First
 deploy the site without address/block to verify preview mode; after contract
 verification, add both values and repeat production browser tests and hard
 refreshes for `/invoices/<id>` and `/proof/<id>`.
+
+Source verification is a separate post-deployment gate. Follow
+`docs/BLOCKSCOUT_VERIFICATION.md`; do not guess a verifier API URL or describe a
+manual evidence bundle as explorer verification.
 
 ## Rollback and stop conditions
 

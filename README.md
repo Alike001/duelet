@@ -71,6 +71,12 @@ contract accounting separate.
 - `fixtures` — deterministic Solidity/TypeScript financial vectors.
 - `docs` — product, threat, release, deployment and grant evidence.
 
+The Phase 4.1 wallet decision is documented in
+[`docs/WALLET_INTEGRATION.md`](docs/WALLET_INTEGRATION.md). Duelet currently
+uses its verified Wagmi 3 injected-wallet path; WalletConnect QR remains
+disabled pending a real Reown project ID, a stable compatible adapter, and a
+license decision.
+
 ## Local development
 
 Requirements: Node.js 24, npm 11, upstream Foundry, and Circle Arc Foundry
@@ -103,6 +109,8 @@ No broadcast is authorized by this repository. Follow
 [`docs/MAINNET_RELEASE_RUNBOOK.md`](docs/MAINNET_RELEASE_RUNBOOK.md). After a
 real deployment, reviewers should verify the chain, receipt, runtime code hash,
 `USDC()` immutable, invoice events, current state and `/proof/[id]` accounting.
+The prepared explorer procedure is in
+[`docs/BLOCKSCOUT_VERIFICATION.md`](docs/BLOCKSCOUT_VERIFICATION.md).
 
 The public application is live in preview mode. The contract address remains
 intentionally blank until a verified Arc mainnet deployment exists.

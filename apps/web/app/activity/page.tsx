@@ -24,7 +24,7 @@ export default function ActivityPage() {
         <ActivityFeed />
       </section>
       <p className="index-note">
-        <strong>Reliability:</strong> logs are requested in bounded 25,000-block
+        <strong>Reliability:</strong> logs are requested in bounded 9,999-block
         ranges, deduplicated by transaction hash and log index, then ordered by
         block and log position.{' '}
         {deployment.mode === 'preview' &&

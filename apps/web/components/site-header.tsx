@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import { WalletButton } from './wallet-button';
 
@@ -10,6 +13,8 @@ const nav = [
 ] as const;
 
 export function SiteHeader() {
+  const pathname = usePathname();
+
   return (
     <header className="site-header">
       <Link className="brand" href="/" aria-label="Duelet home">
@@ -21,7 +26,15 @@ export function SiteHeader() {
       </Link>
       <nav aria-label="Primary navigation">
         {nav.map(([href, label]) => (
-          <Link href={href} key={href}>
+          <Link
+            href={href}
+            key={href}
+            className={
+              pathname === href || pathname.startsWith(`${href}/`)
+                ? 'active'
+                : undefined
+            }
+          >
             {label}
           </Link>
         ))}

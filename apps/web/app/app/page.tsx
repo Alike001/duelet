@@ -23,17 +23,41 @@ export default function WorkspacePage() {
         </Link>
       </div>
       {connection.status !== 'connected' ? (
-        <section className="wallet-gate">
-          <div className="wallet-visual">
-            <WalletIcon />
-          </div>
-          <h2>Connect a wallet to find your invoices.</h2>
-          <p>
-            Duelet will search confirmed contract events for streams where this
-            address is the payer or payee. No account or email is required.
-          </p>
-          <WalletButton />
-        </section>
+        <div className="workspace-disconnected">
+          <section className="wallet-gate">
+            <p className="eyebrow">Your address is the account</p>
+            <div className="wallet-visual">
+              <WalletIcon />
+            </div>
+            <h2>Connect a wallet to find your invoices.</h2>
+            <p>
+              Duelet searches confirmed contract events for streams where this
+              address is the payer or payee. No account or email is required.
+            </p>
+            <WalletButton />
+          </section>
+          <aside className="workspace-role-guide">
+            <div>
+              <span>As payer</span>
+              <strong>Create · fund · cancel</strong>
+              <p>
+                Lock the complete payment, monitor vesting, and recover only the
+                portion the recipient has not earned.
+              </p>
+            </div>
+            <div>
+              <span>As recipient</span>
+              <strong>Inspect · claim · prove</strong>
+              <p>
+                Watch entitlement vest and receive every earned unit at the
+                immutable payee address.
+              </p>
+            </div>
+            <small>
+              Public proof pages remain available without connecting a wallet.
+            </small>
+          </aside>
+        </div>
       ) : (
         <>
           <section className="workspace-summary">

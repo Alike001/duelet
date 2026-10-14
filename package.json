@@ -19,6 +19,7 @@
     "format": "prettier --write . && npm run format --workspace @duelet/contracts",
     "format:check": "prettier --check . && npm run format:check --workspace @duelet/contracts",
     "licenses:generate": "node scripts/generate-license-report.mjs",
+    "release:verification-bundle": "node scripts/prepare-blockscout-bundle.mjs",
     "lint": "npm run lint --workspaces --if-present",
     "secret:scan": "bash scripts/secret-scan.sh",
     "test": "npm run test --workspaces --if-present",
