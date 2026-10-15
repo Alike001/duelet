@@ -9,13 +9,13 @@ earn payments over time and claim vested funds. If a payer cancels an active
 stream, the contract returns unvested USDC while preserving the recipient's
 earned entitlement.
 
-Duelet is currently **not deployed**. The application runs in explicit preview
-mode and all writes remain locked until a configured Arc deployment matches the
-approved runtime bytecode and immutable USDC address. The contracts are
-unaudited.
+Duelet is deployed on Arc mainnet. The application enables contract interaction
+only after the configured deployment matches the approved runtime bytecode and
+immutable USDC address. The contracts are unaudited.
 
-- **Application:** [duelet.vercel.app](https://duelet.vercel.app) — preview mode
+- **Application:** [duelet.vercel.app](https://duelet.vercel.app)
 - **Source:** [github.com/Alike001/duelet](https://github.com/Alike001/duelet)
+- **Contract:** [`0x90d3…59f`](https://explorer.arc.io/address/0x90d3e5aee13d444ec0679bdd3663dee823a3959f?tab=contract)
 
 ## The payment problem
 
@@ -106,27 +106,30 @@ transactions are local test state, not mainnet evidence.
 
 No broadcast is authorized by this repository. Follow
 [`docs/MAINNET_RELEASE_RUNBOOK.md`](docs/MAINNET_RELEASE_RUNBOOK.md). After a
-real deployment, reviewers should verify the chain, receipt, runtime code hash,
+deployment, reviewers should verify the chain, receipt, runtime code hash,
 `USDC()` immutable, invoice events, current state and `/proof/[id]` accounting.
 The prepared explorer procedure is in
 [`docs/BLOCKSCOUT_VERIFICATION.md`](docs/BLOCKSCOUT_VERIFICATION.md).
 
-The public application is live in preview mode. The contract address remains
-intentionally blank until a verified Arc mainnet deployment exists.
+The Arc mainnet deployment is recorded in
+[`docs/MAINNET_DEPLOYMENT_EVIDENCE.md`](docs/MAINNET_DEPLOYMENT_EVIDENCE.md).
+Its source and bytecode are exact matches on
+[Sourcify](https://sourcify.dev/server/v2/contract/5042/0x90d3e5aee13d444ec0679bdd3663dee823a3959f)
+and [Arc Blockscout](https://explorer.arc.io/address/0x90d3e5aee13d444ec0679bdd3663dee823a3959f?tab=contract).
 
-## Preview demonstration
+## Demonstration
 
 1. Open the application without connecting a wallet and inspect the labeled
    illustrative stream in the hero.
 2. Visit `/invoices/new` to review the exact approval, funding, vesting, and
-   cancellation terms. Preview mode cannot prepare a live write.
+   cancellation terms before any wallet signature.
 3. Open `/proof/preview` to verify the deterministic accounting identity.
 4. Review `/docs` for direct-contract recovery, trust assumptions, and known
    limitations.
 
-After a verified Arc deployment, the same interface switches to confirmed
-contract state and event evidence only after the runtime hash, immutable USDC
-address, chain, and deployment block all pass the documented release checks.
+The interface switches to confirmed contract state and event evidence only
+after the runtime hash, immutable USDC address, chain, and deployment block all
+pass the documented release checks.
 
 ## Security and limitations
 
