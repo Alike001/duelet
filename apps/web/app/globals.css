@@ -1461,7 +1461,8 @@ code {
   font-weight: 700;
 }
 .invoice-form input,
-.invoice-form textarea {
+.invoice-form textarea,
+.invoice-form select {
   width: 100%;
   margin-top: 7px;
   padding: 13px 14px;
@@ -1475,7 +1476,8 @@ code {
     box-shadow 0.2s ease;
 }
 .invoice-form input:focus,
-.invoice-form textarea:focus {
+.invoice-form textarea:focus,
+.invoice-form select:focus {
   border-color: var(--brand);
   box-shadow: 0 0 0 4px rgb(102 85 232 / 10%);
 }
@@ -1534,8 +1536,7 @@ code {
   box-shadow: 0 1px 4px rgb(24 32 54 / 9%);
 }
 .review-card {
-  position: sticky;
-  top: 126px;
+  position: relative;
   padding: 30px;
   border: 1px solid #dedaf4;
   border-radius: var(--radius-md);
@@ -2801,4 +2802,55 @@ code {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Keep payment setup readable without exposing contract units by default. */
+.duration-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.schedule-help {
+  color: var(--muted, #64748b);
+  font-size: 14px;
+  line-height: 1.65;
+  margin: 16px 0 0;
+}
+.optional-details {
+  margin-top: 24px;
+}
+.optional-details label {
+  margin-top: 18px;
+}
+.connect-next-step {
+  background: #f3f0ff;
+  border: 1px solid #e0d9ff;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+.connect-next-step p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #59627b;
+  margin: 8px 0 16px;
+}
+.connect-next-step .wallet-trigger {
+  width: 100%;
+  justify-content: center;
+  min-height: 48px;
+}
+
+.mainnet-proof-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+  color: #5142bc;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  line-height: 1.6;
 }

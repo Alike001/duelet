@@ -32,6 +32,8 @@ import {
   shortHash,
 } from '@/lib/finance';
 
+import { WalletButton } from './wallet-button';
+
 const DOMAIN = keccak256(stringToHex('ARC_INVOICE_STREAM_V1'));
 
 export function CreateInvoiceForm() {
@@ -43,7 +45,21 @@ export function CreateInvoiceForm() {
   const [description, setDescription] = useState('');
   const [startMode, setStartMode] = useState<'now' | 'future'>('now');
   const [startValue, setStartValue] = useState('');
-  const [duration, setDuration] = useState('180');
+  const [durationValue, setDurationValue] = useState('3');
+  const [durationUnit, setDurationUnit] = useState<
+    '1' | '60' | '3600' | '86400' | '604800'
+  >('60');
+  const [hasEdited, setHasEdited] = useState(false);
+  const duration = /^\d+$/.test(durationValue)
+    ? (BigInt(durationValue) * BigInt(durationUnit)).toString()
+    : '';
+  const durationLabel = {
+    '1': 'seconds',
+    '60': 'minutes',
+    '3600': 'hours',
+    '86400': 'days',
+    '604800': 'weeks',
+  }[durationUnit];
   const [generatedReference, setGeneratedReference] = useState('');
   const [observedNow, setObservedNow] = useState<number | null>(null);
   const [replacementNotice, setReplacementNotice] = useState('');
@@ -297,6 +313,7 @@ export function CreateInvoiceForm() {
     <div className="create-layout">
       <form
         className="invoice-form"
+        onBlur={() => setHasEdited(true)}
         onSubmit={(event) => event.preventDefault()}
       >
         <section className="form-section">
@@ -329,8 +346,7 @@ export function CreateInvoiceForm() {
               <span>USDC</span>
             </div>
             <small id="amount-help">
-              Six decimal places maximum · {parsed.baseUnits.toString()} base
-              units
+              The full amount is funded upfront. Up to six decimal places.
             </small>
           </label>
         </section>
@@ -371,15 +387,36 @@ export function CreateInvoiceForm() {
               />
             </label>
           )}
-          <label>
-            Duration in seconds
-            <input
-              value={duration}
-              onChange={(event) => setDuration(event.target.value)}
-              inputMode="numeric"
-            />
-            <small>Use at least 180 seconds for an observable canary.</small>
-          </label>
+          <div className="duration-fields">
+            <label>
+              Payment duration
+              <input
+                value={durationValue}
+                onChange={(event) => setDurationValue(event.target.value)}
+                inputMode="numeric"
+                aria-describedby="duration-help"
+              />
+            </label>
+            <label>
+              Time unit
+              <select
+                value={durationUnit}
+                onChange={(event) =>
+                  setDurationUnit(event.target.value as typeof durationUnit)
+                }
+              >
+                <option value="60">Minutes</option>
+                <option value="3600">Hours</option>
+                <option value="86400">Days</option>
+                <option value="604800">Weeks</option>
+                <option value="1">Seconds</option>
+              </select>
+            </label>
+          </div>
+          <p className="schedule-help" id="duration-help">
+            Funds become available evenly over this period. The recipient claims
+            available USDC to their wallet; transfers are not automatic.
+          </p>
         </section>
         <section className="form-section">
           <div className="form-section-title">
@@ -401,19 +438,23 @@ export function CreateInvoiceForm() {
               generates a unique private reference for this draft.
             </small>
           </label>
-          <label>
-            Public metadata commitment <em>optional</em>
-            <textarea
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              placeholder="A non-sensitive phrase to commit as a public hash"
-              rows={3}
-            />
-            <small>
-              A hash is not encryption and short phrases can be guessed. Never
-              enter names, addresses, invoice documents, or confidential terms.
-            </small>
-          </label>
+          <details className="review-technical optional-details">
+            <summary>Advanced: public metadata</summary>
+            <label>
+              Public metadata commitment <em>optional</em>
+              <textarea
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder="A non-sensitive phrase to commit as a public hash"
+                rows={3}
+              />
+              <small>
+                A hash is not encryption and short phrases can be guessed. Never
+                enter names, addresses, invoice documents, or confidential
+                terms.
+              </small>
+            </label>
+          </details>
         </section>
       </form>
       <aside className="review-card">
@@ -442,7 +483,11 @@ export function CreateInvoiceForm() {
           <div>
             <dt>Recipient</dt>
             <dd>
-              {isAddress(payee) ? shortHash(payee, 7) : 'Invalid or missing'}
+              {isAddress(payee)
+                ? shortHash(payee, 7)
+                : payee
+                  ? 'Check recipient address'
+                  : 'Add a recipient'}
             </dd>
           </div>
           <div>
@@ -459,7 +504,9 @@ export function CreateInvoiceForm() {
           </div>
           <div>
             <dt>Duration</dt>
-            <dd>{duration || '0'} seconds</dd>
+            <dd>
+              {durationValue || '0'} {durationLabel}
+            </dd>
           </div>
           <div>
             <dt>Contract</dt>
@@ -491,6 +538,10 @@ export function CreateInvoiceForm() {
         <details className="review-technical">
           <summary>Technical payment details</summary>
           <div className="hash-preview">
+            <span>Contract duration</span>
+            <code>{duration || '0'} seconds</code>
+            <span>Deposit in token units</span>
+            <code>{parsed.baseUnits.toString()}</code>
             <span>Reference hash</span>
             <code>{parsed.referenceHash}</code>
             {parsed.invoiceId && (
@@ -508,7 +559,7 @@ export function CreateInvoiceForm() {
             amount already earned remains available to the recipient.
           </p>
         </div>
-        {parsed.errors.length > 0 && (
+        {hasEdited && parsed.errors.length > 0 && (
           <div className="form-errors" role="alert">
             <strong>Resolve before funding</strong>
             <ul>
@@ -541,9 +592,14 @@ export function CreateInvoiceForm() {
           </p>
         )}
         {connection.status !== 'connected' && (
-          <p className="inline-warning">
-            Connect a wallet to prepare approval and funding.
-          </p>
+          <div className="connect-next-step">
+            <strong>Ready to continue?</strong>
+            <p>
+              Connect your wallet, then approve the exact amount and fund your
+              payment.
+            </p>
+            <WalletButton connectLabel="Connect wallet to continue" />
+          </div>
         )}
         {deployment.mode === 'deployed' && !deploymentVerification.verified && (
           <p className="inline-warning">
@@ -575,7 +631,7 @@ export function CreateInvoiceForm() {
               ? 'Exact allowance available'
               : approvalReceipt.isLoading
                 ? 'Approval submitted…'
-                : '1. Approve exact amount'}
+                : 'Approve exact amount'}
           </button>
           <button
             className="button button-dark"
@@ -595,7 +651,7 @@ export function CreateInvoiceForm() {
             <span>2</span>
             {fundingReceipt.isLoading
               ? 'Funding submitted…'
-              : '2. Fund payment schedule'}
+              : 'Fund payment schedule'}
           </button>
         </div>
         {approval.error && (
@@ -642,8 +698,10 @@ export function CreateInvoiceForm() {
           </p>
         )}
         <p className="review-foot">
-          No transaction is available until a verified contract address is
-          configured. Duelet never requests an unlimited allowance.
+          {deployment.mode === 'preview'
+            ? 'This preview cannot send transactions.'
+            : 'You review and confirm each transaction in your wallet.'}{' '}
+          Duelet never requests an unlimited allowance.
         </p>
       </aside>
     </div>

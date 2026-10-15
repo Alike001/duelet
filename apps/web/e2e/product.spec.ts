@@ -170,10 +170,12 @@ test('creation flow validates inputs and blocks writes before deployment', async
   await expect(
     page.getByRole('button', { name: /Approve exact amount/ }),
   ).toBeDisabled();
+  await expect(page.getByText('Resolve before funding')).not.toBeVisible();
   await page.getByLabel('Recipient wallet address').fill('not-an-address');
+  await page.getByLabel('Recipient wallet address').blur();
   await expect(page.getByText('Enter a valid payee address.')).toBeVisible();
   await expect(
-    page.getByText(/No transaction is available until/),
+    page.getByText(/This preview cannot send transactions/),
   ).toBeVisible();
 });
 
@@ -467,4 +469,37 @@ test('reduced-motion preference disables decorative movement', async ({
     .locator('.stream-instrument .progress-track > span')
     .evaluate((element) => getComputedStyle(element).animationDuration);
   expect(Number.parseFloat(duration)).toBeLessThanOrEqual(0.00001);
+});
+
+test('payment duration converts to contract seconds and connects from the summary', async ({
+  page,
+}) => {
+  await page.goto('/invoices/new');
+  await page.getByLabel('Payment duration').fill('2');
+  await page.getByLabel('Time unit').selectOption('86400');
+  await expect(page.getByText('2 days', { exact: true })).toBeVisible();
+  await page.getByText('Technical payment details', { exact: true }).click();
+  await expect(page.getByText('172800 seconds', { exact: true })).toBeVisible();
+  await page.getByLabel('Time unit').selectOption('604800');
+  await expect(
+    page.getByText('1209600 seconds', { exact: true }),
+  ).toBeVisible();
+  await page.getByLabel('Payment duration').fill('0');
+  await page.getByLabel('Payment duration').blur();
+  await expect(
+    page.getByText('Duration must be at least one second.'),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: /Fund payment schedule/ }),
+  ).toBeDisabled();
+  await page
+    .getByRole('button', { name: /Connect wallet to continue/ })
+    .click();
+  await expect(
+    page.getByRole('dialog', { name: 'Connect to Duelet' }),
+  ).toBeVisible();
+  const ids = await page
+    .locator('[id]')
+    .evaluateAll((elements) => elements.map((element) => element.id));
+  expect(new Set(ids).size).toBe(ids.length);
 });

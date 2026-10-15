@@ -18,8 +18,9 @@ export default function HomePage() {
             </div>
             <h1>Invoice once. Pay over time.</h1>
             <p>
-              Fund a business payment upfront. Your recipient earns USDC on a
-              clear schedule, while every dollar stays accounted for onchain.
+              Fund a contractor payment upfront. Your recipient earns USDC over
+              an agreed schedule and claims it to their wallet. Every dollar
+              stays accounted for onchain.
             </p>
             <div className="hero-actions">
               <Link className="button button-accent" href="/invoices/new">
@@ -29,6 +30,15 @@ export default function HomePage() {
                 Explore an example <span>→</span>
               </Link>
             </div>
+            <a
+              className="mainnet-proof-link"
+              href="https://explorer.arc.io/tx/0xc8eda3ec664830e7eb1a0ca5702b266cc8df1eaf2ed1d3cbd1d495cab065acc6"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span aria-hidden="true">↗</span> View a real 0.01 USDC funding
+              transaction
+            </a>
             <div className="hero-assurance">
               <span>Fully funded before it starts</span>
               <span>Recipient address cannot change</span>
@@ -80,9 +90,7 @@ export default function HomePage() {
               <div className="role-number">P</div>
               <div>
                 <span>For the payer</span>
-                <h3>
-                  Commit the full budget without paying ahead of progress.
-                </h3>
+                <h3>Commit the budget. Release funds on an agreed schedule.</h3>
                 <ul>
                   <li>Fund the complete invoice upfront</li>
                   <li>Track vested and remaining scheduled amounts</li>
@@ -179,14 +187,14 @@ export default function HomePage() {
           </p>
           <p className="disclosure">
             Duelet is unaudited software. Circle can pause or block USDC
-            transfers. The current public application is an explicit preview.
+            transfers. Payments follow elapsed time, not work completion.
           </p>
         </section>
 
         <section className="home-final-cta">
           <div>
             <span>One invoice. One schedule. One clear record.</span>
-            <h2>Make the payment match the work.</h2>
+            <h2>Give every payment a clear schedule.</h2>
           </div>
           <Link className="button button-accent" href="/invoices/new">
             Create payment <ArrowIcon />

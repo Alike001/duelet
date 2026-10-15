@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { formatUnits } from 'viem';
 import {
   type Connector,
@@ -23,7 +23,12 @@ import {
 
 import { CopyIcon, ExternalIcon, WalletIcon } from './icons';
 
-export function WalletButton() {
+export function WalletButton({
+  connectLabel = 'Connect',
+}: {
+  connectLabel?: string;
+}) {
+  const dialogTitleId = useId();
   const connection = useConnection();
   const connectors = useConnectors();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -179,14 +184,14 @@ export function WalletButton() {
                 : 'Wallet'}
           </small>
           <strong>
-            {isConnected ? shortHash(connection.address ?? '') : 'Connect'}
+            {isConnected ? shortHash(connection.address ?? '') : connectLabel}
           </strong>
         </span>
       </button>
       <dialog
         className="wallet-dialog"
         ref={dialog}
-        aria-labelledby="wallet-dialog-title"
+        aria-labelledby={dialogTitleId}
         onClick={(event) => {
           if (event.target === dialog.current) closeWallet();
         }}
@@ -199,7 +204,7 @@ export function WalletButton() {
           <div className="wallet-sheet-head">
             <div>
               <p className="eyebrow">Arc payment wallet</p>
-              <h2 id="wallet-dialog-title">
+              <h2 id={dialogTitleId}>
                 {view === 'account' ? 'Wallet details' : 'Connect to Duelet'}
               </h2>
             </div>
