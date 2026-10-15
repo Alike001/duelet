@@ -1,10 +1,10 @@
 'use client';
 
 export default function RouteError({
-  retry,
+  reset,
 }: {
   error: Error & { digest?: string };
-  retry: () => void;
+  reset: () => void;
 }) {
   return (
     <main className="route-error">
@@ -14,7 +14,7 @@ export default function RouteError({
         No transaction status has been inferred. Retry the read, or verify the
         contract directly if the RPC remains unavailable.
       </p>
-      <button className="button button-dark" onClick={retry} type="button">
+      <button className="button button-dark" onClick={reset} type="button">
         Retry
       </button>
     </main>

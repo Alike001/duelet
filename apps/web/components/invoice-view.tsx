@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { isHex } from 'viem';
+import { isHex, type ContractFunctionReturnType } from 'viem';
 import {
   useConnection,
   useReadContracts,
@@ -28,17 +28,11 @@ import { PREVIEW_INVOICE_ID, previewInvoice, previewNow } from '@/lib/preview';
 import { CopyIcon, ExternalIcon } from './icons';
 import { StatusPill } from './status-pill';
 
-type InvoiceTuple = readonly [
-  `0x${string}`,
-  `0x${string}`,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  `0x${string}`,
-];
+type InvoiceResult = ContractFunctionReturnType<
+  typeof dueletAbi,
+  'view',
+  'getInvoice'
+>;
 
 export function InvoiceView({
   requestedId,
@@ -112,8 +106,12 @@ export function InvoiceView({
         illustrative: true,
       };
     }
-    const tuple = reads.data?.[0]?.result as InvoiceTuple | undefined;
-    if (!tuple) return undefined;
+    const invoice: InvoiceResult | undefined =
+      reads.data?.[0]?.status === 'success' ? reads.data[0].result : undefined;
+    const allReadsSucceeded =
+      reads.data?.length === 6 &&
+      reads.data.every((read) => read.status === 'success');
+    if (!invoice || !allReadsSucceeded) return undefined;
     const statuses = [
       'Nonexistent',
       'Scheduled',
@@ -130,15 +128,15 @@ export function InvoiceView({
       invoiceId: id,
       reference: 'Reference hash available in creation event',
       referenceHash: undefined,
-      payer: tuple[0],
-      payee: tuple[1],
-      totalAmount: tuple[2],
-      withdrawnAmount: tuple[3],
-      refundedAmount: tuple[4],
-      startTime: tuple[5],
-      endTime: tuple[6],
-      canceledAt: tuple[7],
-      metadataHash: tuple[8],
+      payer: invoice.payer,
+      payee: invoice.payee,
+      totalAmount: invoice.totalAmount,
+      withdrawnAmount: invoice.withdrawnAmount,
+      refundedAmount: invoice.refundedAmount,
+      startTime: invoice.startTime,
+      endTime: invoice.endTime,
+      canceledAt: invoice.canceledAt,
+      metadataHash: invoice.metadataHash,
       vested: resultAt(1),
       claimable: resultAt(2),
       refundable: resultAt(3),
@@ -247,6 +245,7 @@ export function InvoiceView({
       <Unavailable
         title="Invoice unavailable"
         body="The Arc RPC did not return a valid invoice. It may not exist, or the public RPC may be unavailable."
+        onRetry={() => void reads.refetch()}
       />
     );
   if (!data) return null;
@@ -623,12 +622,25 @@ export function InvoiceView({
   );
 }
 
-function Unavailable({ title, body }: { title: string; body: string }) {
+function Unavailable({
+  title,
+  body,
+  onRetry,
+}: {
+  title: string;
+  body: string;
+  onRetry?: () => void;
+}) {
   return (
     <div className="empty-state detail-empty">
       <span className="empty-orbit" />
       <h2>{title}</h2>
       <p>{body}</p>
+      {onRetry && (
+        <button className="button button-dark" onClick={onRetry} type="button">
+          Retry read
+        </button>
+      )}
       <Link className="button button-dark" href="/proof/preview">
         Open illustrative proof
       </Link>
