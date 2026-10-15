@@ -1,8 +1,13 @@
 import Link from 'next/link';
 
 import { PageShell } from '@/components/page-shell';
+import { MAINNET_PROOF_PATH, MAINNET_CONTRACT_URL } from '@/lib/evidence';
 
 const topics = [
+  [
+    'Payment visibility',
+    'Arc is public. Wallet addresses, amounts, schedules, claims, and refunds can be read by anyone. My invoices and your workspace filter records to your connected wallet; Public activity shows all Duelet wallets. This filtering is not encryption or access control. Never put confidential information in an onchain reference or metadata field.',
+  ],
   [
     'How funding works',
     'A payer approves the exact invoice amount, then createAndFund atomically records immutable terms and pulls the complete amount into escrow. An invoice cannot exist in an underfunded state.',
@@ -56,9 +61,9 @@ export default function DocsPage() {
           <div className="docs-callout">
             <strong>Important</strong>
             <p>
-              The contract is extensively tested but unaudited and not deployed.
-              Preview mode cannot move funds. Do not treat this interface as a
-              safety guarantee.
+              Duelet is deployed on Arc mainnet and remains unaudited. A preview
+              or unverified configuration cannot send transactions. Do not treat
+              this interface as a safety guarantee.
             </p>
           </div>
           {topics.map(([title, body]) => (
@@ -113,15 +118,20 @@ export default function DocsPage() {
               >
                 GitHub
               </a>
-              . A verified deployment receipt will be added only when it
-              actually exists. No mainnet deployment is claimed in preview mode.
+              . The{' '}
+              <a href={MAINNET_CONTRACT_URL} target="_blank" rel="noreferrer">
+                verified mainnet contract
+              </a>{' '}
+              has a confirmed 0.01 USDC funding and full claim. Cancellation is
+              tested in the repository but is not claimed as mainnet
+              demonstration evidence.
             </p>
             <div className="docs-actions">
-              <Link className="button button-dark" href="/proof/preview">
-                Inspect accounting proof
+              <Link className="button button-dark" href={MAINNET_PROOF_PATH}>
+                View real payment proof
               </Link>
               <Link className="button button-ghost" href="/invoices/new">
-                Preview invoice creation
+                Create a payment
               </Link>
             </div>
           </section>

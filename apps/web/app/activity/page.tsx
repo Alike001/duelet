@@ -8,10 +8,11 @@ export default function ActivityPage() {
       <div className="page-heading">
         <div>
           <p className="page-kicker">Confirmed payment history</p>
-          <h1>Activity</h1>
+          <h1>Public activity</h1>
           <p>
-            Creation, claim, and cancellation events read from Arc. A simulation
-            or pending transaction never appears here as confirmed activity.
+            Confirmed payments across all Duelet wallets. Arc transactions are
+            public: anyone can see wallet addresses, amounts, and payment times.
+            For your own payments, open My invoices.
           </p>
         </div>
       </div>

@@ -51,32 +51,18 @@ export async function loadActivity(): Promise<DueletActivity[]> {
       from + EVENT_LOG_RANGE - 1n > confirmedLatest
         ? confirmedLatest
         : from + EVENT_LOG_RANGE - 1n;
-    const [created, withdrawn, canceled] = await Promise.all([
-      client.getContractEvents({
-        address: deployment.address,
-        abi: dueletAbi,
-        eventName: 'InvoiceCreated',
-        fromBlock: from,
-        toBlock: to,
-        strict: true,
-      }),
-      client.getContractEvents({
-        address: deployment.address,
-        abi: dueletAbi,
-        eventName: 'FundsWithdrawn',
-        fromBlock: from,
-        toBlock: to,
-        strict: true,
-      }),
-      client.getContractEvents({
-        address: deployment.address,
-        abi: dueletAbi,
-        eventName: 'InvoiceCanceled',
-        fromBlock: from,
-        toBlock: to,
-        strict: true,
-      }),
-    ]);
+    // One contract-wide query retrieves all three event types. Separate
+    // requests per event triple the public RPC load on every page visit.
+    const logs = await client.getContractEvents({
+      address: deployment.address,
+      abi: dueletAbi,
+      fromBlock: from,
+      toBlock: to,
+      strict: true,
+    });
+    const created = logs.filter((log) => log.eventName === 'InvoiceCreated');
+    const withdrawn = logs.filter((log) => log.eventName === 'FundsWithdrawn');
+    const canceled = logs.filter((log) => log.eventName === 'InvoiceCanceled');
     for (const log of created)
       all.push({
         key: `${log.transactionHash}-${log.logIndex}`,

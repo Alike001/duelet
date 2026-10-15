@@ -7,6 +7,8 @@ import { useReadContract } from 'wagmi';
 
 import { dueletAbi } from '@/lib/abi';
 import { deployment } from '@/lib/chain';
+import { invoicesForWallet } from '@/lib/activity-scope';
+import { WalletButton } from './wallet-button';
 import { loadActivity, type DueletActivity } from '@/lib/events';
 import { formatUsdc, shortHash } from '@/lib/finance';
 
@@ -28,13 +30,11 @@ export function InvoiceRegistry({
       deployment.block?.toString(),
     ],
     queryFn: loadActivity,
-    enabled: deployment.mode === 'deployed',
+    staleTime: 30_000,
+    enabled: deployment.mode === 'deployed' && Boolean(wallet),
   });
   const created = useMemo(() => {
-    const seen = new Set<string>();
-    return (query.data ?? []).filter((item) => {
-      if (item.type !== 'created' || seen.has(item.invoiceId)) return false;
-      seen.add(item.invoiceId);
+    return invoicesForWallet(query.data ?? [], wallet).filter((item) => {
       const matchSearch =
         !search ||
         item.invoiceId.toLowerCase().includes(search.toLowerCase()) ||
@@ -56,6 +56,17 @@ export function InvoiceRegistry({
         body="Preview mode never fabricates wallet positions. Inspect the deterministic proof while deployment remains pending."
       />
     );
+  if (!wallet)
+    return (
+      <div className="empty-state">
+        <h3>Connect to see your invoices</h3>
+        <p>
+          Only invoices you funded or receive appear here. Onchain payment
+          records remain public.
+        </p>
+        <WalletButton />
+      </div>
+    );
   if (query.isPending)
     return (
       <div className="skeleton-stack">
@@ -75,13 +86,18 @@ export function InvoiceRegistry({
     return (
       <RegistryEmpty
         title="No matching invoices found"
-        body="No confirmed creation event matched this role, state, or search. The newest 20 blocks are held for reorganization safety, and public RPC history may be incomplete."
+        body="No confirmed creation event matched this role, state, or search. Public RPC history may be incomplete."
       />
     );
   return (
     <div>
       {created.map((item) => (
-        <InvoiceRegistryRow event={item} filter={filter} key={item.invoiceId} />
+        <InvoiceRegistryRow
+          event={item}
+          filter={filter}
+          wallet={wallet}
+          key={item.invoiceId}
+        />
       ))}
     </div>
   );
@@ -90,9 +106,11 @@ export function InvoiceRegistry({
 function InvoiceRegistryRow({
   event,
   filter,
+  wallet,
 }: {
   event: DueletActivity;
   filter: string;
+  wallet: string;
 }) {
   const statusRead = useReadContract({
     address: deployment.address,
@@ -137,7 +155,14 @@ function InvoiceRegistryRow({
             : 'Reference unavailable'}
         </span>
       </div>
-      <span>{shortHash(event.payee ?? event.payer ?? '', 7)}</span>
+      <span>
+        {shortHash(
+          event.payee?.toLowerCase() === wallet.toLowerCase()
+            ? (event.payer ?? '')
+            : (event.payee ?? ''),
+          7,
+        )}
+      </span>
       <StatusPill
         tone={
           status === 'Canceled'

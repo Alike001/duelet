@@ -27,8 +27,8 @@ Verified independently through `https://rpc.mainnet.arc.io` at
 | Payer balance after deployment | `0.971513019998575651 USDC` native view / `0.971513 USDC` ERC-20 view (shared backing; counted once) |
 
 The deployment input matches `artifacts/blockscout/deployment-input.hex`. The
-runtime matches `artifacts/blockscout/expected-runtime-bytecode.hex`. Canary
-lifecycle evidence is a separate gate and is not claimed by this record.
+runtime matches `artifacts/blockscout/expected-runtime-bytecode.hex`. The subsequent funding and full-claim lifecycle is recorded in
+[MAINNET_LIFECYCLE_EVIDENCE.md](MAINNET_LIFECYCLE_EVIDENCE.md).
 
 ## Source-verification status
 

@@ -347,6 +347,7 @@ export function CreateInvoiceForm() {
             </div>
             <small id="amount-help">
               The full amount is funded upfront. Up to six decimal places.
+              Wallet addresses, amounts, and payment times are public on Arc.
             </small>
           </label>
         </section>

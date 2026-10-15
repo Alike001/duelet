@@ -2854,3 +2854,24 @@ code {
   text-underline-offset: 4px;
   line-height: 1.6;
 }
+
+.demo-day-control {
+  display: grid;
+  gap: 10px;
+  margin: 20px 0;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--ink);
+}
+.demo-day-control input {
+  width: 100%;
+  min-height: 32px;
+  accent-color: var(--brand);
+  cursor: pointer;
+}
+.demo-day-control span {
+  font-size: 11px;
+  font-weight: 450;
+  color: var(--muted);
+  line-height: 1.5;
+}

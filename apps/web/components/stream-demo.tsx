@@ -1,32 +1,26 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { formatUsdc, reconcile } from '@/lib/finance';
 
-import {
-  formatUsdc,
-  ILLUSTRATIVE_STREAM_DURATION,
-  illustrativeInvoiceAt,
-  nextIllustrativeElapsed,
-  reconcile,
-} from '@/lib/finance';
-
-const flow = ['Funded', 'Vesting', 'Claimable', 'Settled'] as const;
+const flow = ['Funded', 'Earning', 'Claimable', 'Fully earned'] as const;
 
 export function StreamDemo() {
-  const [elapsed, setElapsed] = useState(60n);
-
-  useEffect(() => {
-    const timer = window.setInterval(
-      () => setElapsed(nextIllustrativeElapsed),
-      1_000,
-    );
-    return () => window.clearInterval(timer);
-  }, []);
-
-  const invoice = useMemo(() => illustrativeInvoiceAt(elapsed), [elapsed]);
-  const data = reconcile(invoice, elapsed);
-  const progress = Number((data.vested * 10_000n) / invoice.totalAmount) / 100;
-  const flowStep = elapsed === 0n ? 0 : elapsed < 180n ? 2 : 3;
+  const [day, setDay] = useState(10);
+  const invoice = useMemo(
+    () => ({
+      totalAmount: 3_000_000_000n,
+      withdrawnAmount: day >= 5 ? 500_000_000n : 0n,
+      refundedAmount: 0n,
+      startTime: 0n,
+      endTime: 30n * 86_400n,
+      canceledAt: 0n,
+    }),
+    [day],
+  );
+  const data = reconcile(invoice, BigInt(day) * 86_400n);
+  const progress = (day / 30) * 100;
+  const flowStep = day === 0 ? 0 : day < 30 ? 2 : 3;
 
   return (
     <aside
@@ -42,9 +36,9 @@ export function StreamDemo() {
 
       <div className="instrument-title">
         <div>
-          <span>Invoice DUE-0042</span>
+          <span>Example · 30-day contractor engagement</span>
           <h2>
-            0.010000 <small>USDC</small>
+            3,000 <small>USDC</small>
           </h2>
         </div>
         <span className="funding-state">Fully funded</span>
@@ -53,12 +47,12 @@ export function StreamDemo() {
       <div className="instrument-parties">
         <div>
           <span>Payer</span>
-          <strong>0x7A4c…d9D1</strong>
+          <strong>Client</strong>
         </div>
         <span aria-hidden="true">→</span>
         <div>
           <span>Recipient</span>
-          <strong>0x21aC…6542</strong>
+          <strong>Contractor</strong>
         </div>
       </div>
 
@@ -82,15 +76,27 @@ export function StreamDemo() {
         <div className="progress-track">
           <span style={{ width: `${progress}%` }} />
         </div>
-        <small>
-          {elapsed.toString()} of {ILLUSTRATIVE_STREAM_DURATION.toString()}{' '}
-          seconds
-        </small>
+        <small>Day {day} of 30 · 100 USDC earned per day</small>
       </div>
 
+      <label className="demo-day-control">
+        Explore the schedule
+        <input
+          type="range"
+          min="0"
+          max="30"
+          step="1"
+          value={day}
+          onChange={(event) => setDay(Number(event.target.value))}
+          aria-valuetext={`Day ${day} of 30`}
+        />
+        <span>
+          Move the slider. An illustrative 500 USDC claim occurs on day 5.
+        </span>
+      </label>
       <div className="instrument-ledger">
         <div>
-          <span>Vested</span>
+          <span>Earned so far</span>
           <strong>{formatUsdc(data.vested)}</strong>
           <small>USDC</small>
         </div>
@@ -105,14 +111,14 @@ export function StreamDemo() {
           <small>USDC</small>
         </div>
         <div>
-          <span>Still unvested</span>
+          <span>Not yet earned</span>
           <strong>{formatUsdc(data.refundable)}</strong>
           <small>USDC</small>
         </div>
       </div>
 
       <div className="instrument-cancel">
-        <span>If canceled now</span>
+        <span>{day < 30 ? 'If canceled now' : 'Schedule complete'}</span>
         <p>
           The recipient keeps <strong>{formatUsdc(data.claimable)} USDC</strong>{' '}
           still owed; the payer receives{' '}

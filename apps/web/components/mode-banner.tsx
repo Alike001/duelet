@@ -17,9 +17,18 @@ export function ModeBanner() {
       </strong>
       <span>
         {deployment.mode === 'preview'
-          ? 'Illustrative data only. No contract is deployed and payments are disabled.'
+          ? 'Preview configuration. No verified contract is configured here; payments are disabled.'
           : verification.reason}
       </span>
+      {verification.configured && !verification.loading && (
+        <button
+          className="text-button"
+          type="button"
+          onClick={() => void verification.retry()}
+        >
+          Retry verification
+        </button>
+      )}
     </div>
   );
 }

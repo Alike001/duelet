@@ -46,12 +46,15 @@ export function useDeploymentVerification() {
     loading,
     verified,
     runtimeCodeHash,
+    retry: () => Promise.all([bytecode.refetch(), token.refetch()]),
     reason: !configured
       ? 'No deployment is configured.'
       : loading
         ? 'Verifying deployed bytecode and immutable USDC configuration.'
-        : verified
-          ? undefined
-          : 'Configured deployment does not match the approved Duelet bytecode and Arc USDC constructor configuration.',
+        : bytecode.isError || token.isError
+          ? 'Arc RPC verification is unavailable. Retry to check the deployed contract; payments remain locked.'
+          : verified
+            ? undefined
+            : 'Configured deployment does not match the approved Duelet bytecode and Arc USDC constructor configuration.',
   };
 }

@@ -41,7 +41,7 @@ deposit = withdrawn + refunded + remaining liability
 contract USDC balance >= aggregate outstanding liability
 ```
 
-For the shared 0.010000 USDC example, 1,000 base units vest at 18 seconds. At
+For the shared 0.010000 USDC accounting test fixture, 1,000 base units vest at 18 seconds. At
 60 seconds, 3,333 units are vested; cancellation returns 6,667 units and leaves
 2,333 units for the payee after the first claim.
 
@@ -119,17 +119,30 @@ and [Arc Blockscout](https://explorer.arc.io/address/0x90d3e5aee13d444ec0679bdd3
 
 ## Demonstration
 
-1. Open the application without connecting a wallet and inspect the labeled
-   illustrative stream in the hero.
+1. Open the application without connecting a wallet and explore the clearly
+   illustrative 3,000 USDC, 30-day contractor schedule.
 2. Visit `/invoices/new` to review the exact approval, funding, vesting, and
    cancellation terms before any wallet signature.
-3. Open `/proof/preview` to verify the deterministic accounting identity.
+3. Open the [real mainnet proof](https://duelet.vercel.app/proof/0x5d98e7345f25df8b961e06c9631ab7287633132a1fb28e3611ea05e47ae406f6)
+   to inspect the confirmed 0.01 USDC funding and full claim. `/proof/preview`
+   remains a separate deterministic accounting fixture.
 4. Review `/docs` for direct-contract recovery, trust assumptions, and known
    limitations.
 
 The interface switches to confirmed contract state and event evidence only
 after the runtime hash, immutable USDC address, chain, and deployment block all
 pass the documented release checks.
+
+## Verified payment and privacy
+
+The [mainnet evidence record](docs/MAINNET_LIFECYCLE_EVIDENCE.md) documents
+funding and a full claim after maturity, with zero remaining liability. It does
+not claim a mainnet cancellation or partial withdrawal. The grant draft and
+demo script distinguish observed transactions from illustrations.
+
+My invoices and workspace activity are scoped to the connected wallet. Public
+activity and direct proof pages remain visible to everyone. Wallet filtering
+is a navigation convenience, not onchain privacy or access control.
 
 ## Security and limitations
 

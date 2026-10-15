@@ -1,47 +1,39 @@
 # Arc Microgrants checklist
 
-Status: not submitted; not deployed
+Status: mainnet contract deployed; funding and full claim independently verified.
+Submission status is not confirmed. Frontend release and real-phone checks remain.
 
-## Required submission evidence
+## Submission evidence
 
-- [ ] Working application on Arc mainnet.
-- [ ] Public GitHub repository.
-- [ ] Live working link.
-- [ ] Public builder profile.
-- [ ] Accurate explanation of what Duelet does and why it uses Arc.
-- [ ] Real mainnet implementation proof with confirmed transaction hashes.
-- [ ] Honest limitations, dependency disclosure, and unaudited warning.
+- [x] Public repository and builder profile.
+- [x] Public application URL.
+- [x] Verified mainnet contract and runtime identity.
+- [x] Real 0.01 USDC invoice funding and full claim receipts.
+- [x] Reconciliation to zero invoice liability and solvent aggregate state.
+- [x] Accurate draft with real links and explicit limitations.
+- [ ] Latest intended frontend revision confirmed on the production URL.
+- [ ] Real mobile wallet connection and recipient claim verified on a physical phone.
+- [ ] Final demo checked against the released revision.
+- [ ] Applicant declarations and application submission confirmed by the builder.
 
-## Product proof required before submission
+## Optional additional mainnet lifecycle evidence
 
-- [ ] Verified non-upgradeable `DueletStream` deployment.
-- [ ] Real Arc USDC allowance.
-- [ ] Real 0.010000 USDC invoice creation and escrow funding.
-- [ ] Observable partial-time vested withdrawal.
-- [ ] Payer cancellation with unvested refund.
-- [ ] Final vested payee claim.
-- [ ] Zero final invoice liability and solvent aggregate state.
-- [ ] Public proof page reconciles events, balances, and receipts.
-- [ ] Cumulative gas documented beneath the approved cap.
+The completed demonstration is funding followed by a full claim after maturity.
+These unverified steps must not be described as completed:
+
+- [ ] Claim part of an invoice before maturity.
+- [ ] Cancel the active invoice from the payer wallet and verify its refund.
+- [ ] Claim the remaining earned amount and reconcile to zero.
+
+A new demonstration requires wallet signatures. UI review does not authorize
+this document or a script to broadcast transactions.
 
 ## Accuracy rules
 
-- Do not claim deployment, submission, funds moved, or financial success before
-  confirmed receipts exist.
-- Do not substitute test tokens or fork calls for mainnet proof.
-- Do not describe unit tests or source verification as a professional audit.
-- Do not claim revenue, yield, APY, TVL, users, or transaction volume without
-  verifiable evidence.
-- Do not imply Circle, Request Network, or Sablier partnership or endorsement.
+- Distinguish real mainnet evidence, local/fork tests, and illustrations.
+- Do not call tests or source verification a professional audit.
+- Do not claim customer adoption, revenue, partnerships, or endorsement without evidence.
+- Personal wallet filters do not make blockchain records private.
 
-## Current Phase 1 evidence
-
-- [x] Product and financial model locked and implemented in `DueletStream`.
-- [x] Arc configuration documented from official sources.
-- [x] Threat model and unit, fuzz, invariant, adversarial, and fork suites implemented.
-- [x] Shared deterministic Solidity and TypeScript fixture verified.
-- [x] Repository foundation and CI configured.
-- [x] Production contract implementation — unaudited and not deployed.
-- [ ] Professional frontend — later phase, not started.
-- [ ] Mainnet deployment — requires explicit approval.
-- [ ] Mainnet transactions — requires explicit approval.
+See [GRANT_SUBMISSION.md](GRANT_SUBMISSION.md) and
+[MAINNET_LIFECYCLE_EVIDENCE.md](MAINNET_LIFECYCLE_EVIDENCE.md).

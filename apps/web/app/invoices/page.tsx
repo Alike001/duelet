@@ -29,8 +29,8 @@ export default function InvoicesPage() {
           <p className="page-kicker">Payment records</p>
           <h1>My invoices</h1>
           <p>
-            Discovered from confirmed Duelet events, then refreshed against
-            current contract state.
+            Invoices you funded or receive, filtered by your connected wallet.
+            This is a personal view of public onchain records.
           </p>
         </div>
         <Link className="button button-accent" href="/invoices/new">

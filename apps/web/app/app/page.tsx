@@ -7,7 +7,7 @@ import { ActivityFeed } from '@/components/activity-feed';
 import { ArrowIcon, WalletIcon } from '@/components/icons';
 import { PageShell } from '@/components/page-shell';
 import { WalletButton } from '@/components/wallet-button';
-import { deployment } from '@/lib/chain';
+import { WalletSummary } from '@/components/wallet-summary';
 
 export default function WorkspacePage() {
   const connection = useConnection();
@@ -77,44 +77,27 @@ export default function WorkspacePage() {
         </section>
       ) : (
         <div className="workspace-connected">
-          <section className="workspace-balances">
-            <article className="primary-balance">
-              <span>Available to claim</span>
-              <strong>—</strong>
-              <small>USDC · calculated from confirmed contract state</small>
-            </article>
-            <dl>
-              <div>
-                <dt>Invoices funded</dt>
-                <dd>—</dd>
-              </div>
-              <div>
-                <dt>Payments received</dt>
-                <dd>—</dd>
-              </div>
-              <div>
-                <dt>Network</dt>
-                <dd>Arc mainnet</dd>
-              </div>
-            </dl>
-            {deployment.mode === 'preview' && (
-              <p className="workspace-data-note">
-                No contract is deployed, so Duelet will not invent positions for
-                this wallet.
-              </p>
-            )}
-          </section>
+          {connection.address && (
+            <WalletSummary
+              key={connection.address}
+              wallet={connection.address}
+            />
+          )}
 
           <div className="workspace-content-grid">
             <section className="workspace-activity">
               <div className="section-row-head">
                 <div>
                   <h2>Recent activity</h2>
-                  <p>Confirmed Arc events only</p>
+                  <p>Confirmed events for invoices you funded or receive</p>
                 </div>
-                <Link href="/activity">View all</Link>
+                <Link href="/activity">Public activity</Link>
               </div>
-              <ActivityFeed limit={5} />
+              <ActivityFeed
+                limit={5}
+                scope="wallet"
+                wallet={connection.address}
+              />
             </section>
             <aside className="workspace-next-step">
               <span>New payment</span>

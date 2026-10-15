@@ -4,6 +4,7 @@ import { ArrowIcon } from '@/components/icons';
 import { LandingMotion } from '@/components/landing-motion';
 import { PageShell } from '@/components/page-shell';
 import { StreamDemo } from '@/components/stream-demo';
+import { MAINNET_PROOF_PATH } from '@/lib/evidence';
 
 export default function HomePage() {
   return (
@@ -26,8 +27,8 @@ export default function HomePage() {
               <Link className="button button-accent" href="/invoices/new">
                 Create payment <ArrowIcon />
               </Link>
-              <Link className="text-link" href="/proof/preview">
-                Explore an example <span>→</span>
+              <Link className="text-link" href={MAINNET_PROOF_PATH}>
+                View real payment proof <span>→</span>
               </Link>
             </div>
             <a
@@ -125,8 +126,8 @@ export default function HomePage() {
           </div>
           <div className="cancellation-example">
             <div className="example-head">
-              <span>Example at 60 seconds</span>
-              <strong>10,000 base units funded</strong>
+              <span>Illustrative cancellation on day 10 of 30</span>
+              <strong>3,000 USDC funded</strong>
             </div>
             <div className="allocation-bar">
               <span style={{ width: '33.33%' }}>Earned</span>
@@ -135,15 +136,15 @@ export default function HomePage() {
             <dl>
               <div>
                 <dt>Recipient earned</dt>
-                <dd>3,333</dd>
+                <dd>1,000 USDC</dd>
               </div>
               <div>
                 <dt>Payer refund</dt>
-                <dd>6,667</dd>
+                <dd>2,000 USDC</dd>
               </div>
               <div>
                 <dt>Unaccounted</dt>
-                <dd>0</dd>
+                <dd>0 USDC</dd>
               </div>
             </dl>
           </div>
@@ -168,8 +169,8 @@ export default function HomePage() {
               Each invoice exposes its funded amount, payment schedule, claims,
               refunds, remaining escrow, and confirmed transaction evidence.
             </p>
-            <Link className="text-link" href="/proof/preview">
-              View illustrative proof <span>→</span>
+            <Link className="text-link" href={MAINNET_PROOF_PATH}>
+              View real payment proof <span>→</span>
             </Link>
           </div>
         </section>

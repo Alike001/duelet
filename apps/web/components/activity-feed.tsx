@@ -4,11 +4,20 @@ import { useQuery } from '@tanstack/react-query';
 
 import { deployment, txUrl } from '@/lib/chain';
 import { loadActivity } from '@/lib/events';
+import { activityForWallet } from '@/lib/activity-scope';
 import { formatDate, formatUsdc, shortHash } from '@/lib/finance';
 
 import { ExternalIcon } from './icons';
 
-export function ActivityFeed({ limit }: { limit?: number }) {
+export function ActivityFeed({
+  limit,
+  wallet,
+  scope = 'public',
+}: {
+  limit?: number;
+  wallet?: string;
+  scope?: 'public' | 'wallet';
+}) {
   const query = useQuery({
     queryKey: [
       'duelet-activity',
@@ -16,7 +25,9 @@ export function ActivityFeed({ limit }: { limit?: number }) {
       deployment.block?.toString(),
     ],
     queryFn: loadActivity,
-    enabled: deployment.mode === 'deployed',
+    staleTime: 30_000,
+    enabled:
+      deployment.mode === 'deployed' && (scope === 'public' || Boolean(wallet)),
   });
 
   if (deployment.mode === 'preview')
@@ -24,6 +35,13 @@ export function ActivityFeed({ limit }: { limit?: number }) {
       <EmptyActivity
         title="No onchain activity yet"
         body="Event history will appear after a verified Duelet deployment. Preview data is never inserted into this feed."
+      />
+    );
+  if (scope === 'wallet' && !wallet)
+    return (
+      <EmptyActivity
+        title="Connect to see your activity"
+        body="Your activity shows invoices you funded or receive. Public onchain records are still visible to everyone."
       />
     );
   if (query.isPending)
@@ -50,12 +68,22 @@ export function ActivityFeed({ limit }: { limit?: number }) {
         }
       />
     );
-  const events = limit ? query.data.slice(0, limit) : query.data;
+  const scoped =
+    scope === 'wallet' ? activityForWallet(query.data, wallet) : query.data;
+  const events = limit ? scoped.slice(0, limit) : scoped;
   if (!events.length)
     return (
       <EmptyActivity
-        title="No confirmed events"
-        body="The configured deployment block was searched, but no Duelet events were found."
+        title={
+          scope === 'wallet'
+            ? 'No activity for this wallet'
+            : 'No confirmed events'
+        }
+        body={
+          scope === 'wallet'
+            ? 'No confirmed payment events involve this wallet yet.'
+            : 'No Duelet events were found in the configured deployment range.'
+        }
       />
     );
 

@@ -1,41 +1,33 @@
-# Duelet 60–90 second demo script
+# Duelet 75-second grant walkthrough
 
-Use confirmed mainnet data after deployment. Until then, explicitly say
-“illustrative preview” and do not imply funds moved.
+Use the latest frontend revision. The landing slider is illustrative; the
+0.01 USDC proof is real mainnet evidence. Do not describe the illustration as
+customer activity. Recording can be made without connecting a wallet.
 
-**0–12 seconds — purpose**
+| Time   | Screen                                        | Narration                                                                                                                                                                                                  |
+| ------ | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0–12s  | Landing hero, day 10                          | Duelet helps clients fund contractor payments upfront in USDC. The contractor earns funds over an agreed schedule and claims them to their wallet.                                                         |
+| 12–24s | Move the example slider from day 10 to day 20 | This 3,000 USDC, 30-day example is an illustration. One hundred USDC becomes earned each day. Earning funds does not transfer them automatically.                                                          |
+| 24–37s | Create payment, schedule, summary             | Choose a recipient, amount, and schedule. Review the terms, approve the exact amount, then fund the payment. Addresses, amounts, and schedules are public on Arc.                                          |
+| 37–55s | Real mainnet proof                            | Here is the real demonstration: 0.01 USDC funded and fully claimed after maturity. The recipient address was fixed, even though the payer triggered the claim. Both transactions have successful receipts. |
+| 55–65s | Proof reconciliation and explorer links       | The deposit equals withdrawn funds plus refunds plus remaining liability. Here that is 0.01 equals 0.01 plus zero plus zero. No cancellation happened in this real example.                                |
+| 65–75s | Documentation                                 | Arc uses USDC for settlement and gas. Duelet has no admin withdrawal path and remains unaudited. Its source, limitations, and public proof are available for review.                                       |
 
-“Duelet turns one funded USDC invoice into a transparent payment schedule on
-Arc. The payer deposits once; the payee earns over time.” Show the landing hero
-and its preview label.
+## Physical phone check (builder participation required)
 
-**12–28 seconds — create and fund**
+- Open the real proof URL in a phone browser without connecting; confirm funded,
+  withdrawn, and remaining amounts match the evidence record.
+- Connect the intended mobile wallet and verify the address and Arc network.
+- Check My invoices and workspace activity against that address.
+- An unrelated wallet should see no personal invoices, while Public activity
+  and direct proof URLs remain readable.
+- The demonstrated invoice is already settled and has nothing left to claim.
+  A real mobile claim requires a separate funded invoice and wallet signatures.
+  Do not record a simulated click as evidence of a mainnet claim.
 
-Open the creation flow. Show distinct payer/payee addresses, 0.010000 USDC, the
-300-second schedule and exact allowance. Explain: “The invoice exists only if
-the complete escrow transfer succeeds.”
+## Optional cancellation demonstration
 
-**28–45 seconds — vest and claim**
-
-Open the real invoice. Point to deposit, vested, withdrawn, claimable and
-liability. Trigger or show the confirmed partial claim receipt. Explain:
-“Entitlement vests each second, but USDC moves only when a claim is triggered.
-Anyone can trigger it; funds can only reach the stored payee.”
-
-**45–62 seconds — cancel safely**
-
-Show the cancellation preview immediately before signing or its confirmed
-receipt. Explain: “Cancellation stops future vesting. Unused USDC returns to the
-payer, while earned funds remain owed to the payee.”
-
-**62–78 seconds — prove reconciliation**
-
-Open `/proof/<invoiceId>`. Show the contract, chain 5042, transaction hashes and
-the identity: original deposit = withdrawn + refunded + remaining liability.
-After the final claim, show zero liability.
-
-**78–90 seconds — trust boundary**
-
-“Duelet is non-upgradeable, has no admin withdrawal and remains unaudited. The
-proof is on Arc, and recipients can call the contract directly if this frontend
-disappears.” End on the documentation/source links.
+A separate real example requires payer approval/funding, a claim before maturity,
+payer cancellation, and any final earned claim. Verify each receipt before
+adding it to the grant evidence. The present mainnet evidence covers funding
+and a full claim after maturity only.

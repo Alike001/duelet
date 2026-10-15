@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "realRpc": true,
+  "simulatedWallet": true,
+  "transactionsSigned": 0,
+  "checks": [
+    "unrelated wallet has no personal invoices",
+    "recipient sees its invoice",
+    "settled recipient claimable is zero",
+    "workspace activity follows wallet changes",
+    "public activity remains public"
+  ]
+}

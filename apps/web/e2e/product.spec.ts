@@ -503,3 +503,49 @@ test('payment duration converts to contract seconds and connects from the summar
     .evaluateAll((elements) => elements.map((element) => element.id));
   expect(new Set(ids).size).toBe(ids.length);
 });
+
+test('business illustration explains the schedule without pretending it is a real payment', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const example = page.getByRole('complementary', {
+    name: 'Illustrative invoice stream',
+  });
+  await expect(example.getByText('Illustrative payment')).toBeVisible();
+  await expect(
+    example.getByText('Day 10 of 30', { exact: false }),
+  ).toBeVisible();
+  await expect(
+    example.locator('.instrument-ledger .emphasis strong'),
+  ).toHaveText('500');
+  const slider = page.getByRole('slider', { name: 'Explore the schedule' });
+  await slider.fill('20');
+  await expect(
+    example.locator('.instrument-ledger .emphasis strong'),
+  ).toHaveText('1,500');
+  await slider.fill('0');
+  await expect(
+    example.locator('.instrument-ledger .emphasis strong'),
+  ).toHaveText('0');
+  await expect(
+    page.getByRole('link', { name: /View real payment proof/ }).first(),
+  ).toHaveAttribute('href', /\/proof\/0x5d98/);
+});
+
+test('public activity discloses visibility and personal views explain wallet filtering', async ({
+  page,
+}) => {
+  await page.goto('/activity');
+  await expect(
+    page.getByRole('heading', { name: 'Public activity' }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/Confirmed payments across all Duelet wallets/),
+  ).toBeVisible();
+  await page.goto('/invoices');
+  await expect(
+    page.getByText(
+      /Invoices you funded or receive, filtered by your connected wallet/,
+    ),
+  ).toBeVisible();
+});

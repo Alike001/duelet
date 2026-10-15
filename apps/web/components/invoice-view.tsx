@@ -153,6 +153,7 @@ export function InvoiceView({
       deployment.block?.toString(),
     ],
     queryFn: loadActivity,
+    staleTime: 30_000,
     enabled: enabled,
   });
   const events = data?.illustrative
@@ -577,6 +578,7 @@ export function InvoiceView({
                 <a
                   className="icon-link"
                   href={txUrl(event.transactionHash)}
+                  aria-label={`Open ${event.type} transaction in Arc Explorer`}
                   target="_blank"
                   rel="noreferrer"
                 >

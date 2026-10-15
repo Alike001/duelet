@@ -1,0 +1,62 @@
+[
+  {
+    "path": "/",
+    "width": 390,
+    "viewport": 390,
+    "scroll": 390
+  },
+  {
+    "path": "/invoices/new",
+    "width": 390,
+    "viewport": 390,
+    "scroll": 390
+  },
+  {
+    "path": "/invoices",
+    "width": 390,
+    "viewport": 390,
+    "scroll": 390
+  },
+  {
+    "path": "/activity",
+    "width": 390,
+    "viewport": 390,
+    "scroll": 390
+  },
+  {
+    "path": "/proof/0x5d98e7345f25df8b961e06c9631ab7287633132a1fb28e3611ea05e47ae406f6",
+    "width": 390,
+    "viewport": 390,
+    "scroll": 390
+  },
+  {
+    "path": "/",
+    "width": 1440,
+    "viewport": 1440,
+    "scroll": 1440
+  },
+  {
+    "path": "/invoices/new",
+    "width": 1440,
+    "viewport": 1440,
+    "scroll": 1440
+  },
+  {
+    "path": "/invoices",
+    "width": 1440,
+    "viewport": 1440,
+    "scroll": 1440
+  },
+  {
+    "path": "/activity",
+    "width": 1440,
+    "viewport": 1440,
+    "scroll": 1440
+  },
+  {
+    "path": "/proof/0x5d98e7345f25df8b961e06c9631ab7287633132a1fb28e3611ea05e47ae406f6",
+    "width": 1440,
+    "viewport": 1440,
+    "scroll": 1440
+  }
+]
