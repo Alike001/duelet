@@ -1320,9 +1320,13 @@ code {
   margin: 0;
   padding: 11px 13px;
   border-radius: 9px;
+  background: var(--brand-soft);
+  color: var(--muted);
+  font-size: 12px;
+}
+.workspace-data-note-warning {
   background: var(--warning-soft);
   color: var(--warning);
-  font-size: 12px;
 }
 .workspace-content-grid {
   display: grid;

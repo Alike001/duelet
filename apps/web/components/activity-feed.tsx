@@ -56,14 +56,14 @@ export function ActivityFeed({
     return (
       <EmptyActivity
         title="Activity unavailable"
-        body="The public Arc RPC could not return the configured event range."
+        body="We couldn’t load payment history. Please try again."
         action={
           <button
             className="text-button"
             onClick={() => query.refetch()}
             type="button"
           >
-            Retry RPC request
+            Try again
           </button>
         }
       />
@@ -81,8 +81,8 @@ export function ActivityFeed({
         }
         body={
           scope === 'wallet'
-            ? 'No confirmed payment events involve this wallet yet.'
-            : 'No Duelet events were found in the configured deployment range.'
+            ? 'No payments were found for this wallet. Missing one? Open its invoice link.'
+            : 'No confirmed payments were found in the available history.'
         }
       />
     );

@@ -84,14 +84,16 @@ export function WalletSummary({ wallet }: { wallet: `0x${string}` }) {
           <dd>Arc mainnet</dd>
         </div>
       </dl>
-      <p className="workspace-data-note">
+      <p
+        className={`workspace-data-note${failed ? ' workspace-data-note-warning' : ''}`}
+      >
         {deployment.mode === 'preview'
           ? 'No verified deployment is configured here; wallet balances are unavailable.'
           : failed
-            ? 'Some payment data could not be read. Refresh to retry; no missing value is assumed to be zero.'
+            ? 'Some payment details could not be loaded. Refresh the page to try again. Unavailable amounts appear as —.'
             : !historyReady || total === undefined
               ? 'Reading your invoices and current claimable amounts…'
-              : 'Based on discovered invoice events and current contract reads. Public RPC history may be incomplete.'}
+              : 'Showing payments found for this wallet. Missing a payment? Open its invoice link.'}
       </p>
     </section>
   );

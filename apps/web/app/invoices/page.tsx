@@ -72,10 +72,9 @@ export default function InvoicesPage() {
         />
       </section>
       <p className="index-note">
-        <strong>Index coverage:</strong>{' '}
         {deployment.mode === 'preview'
-          ? 'not started — no verified contract or deployment block configured.'
-          : `bounded from configured deployment block ${deployment.block?.toString()}; public RPC retries and deduplication enabled.`}
+          ? 'Invoice history will be available when a verified payment contract is configured.'
+          : 'Your list may not include every payment. Missing one? Open its invoice link.'}
       </p>
     </PageShell>
   );

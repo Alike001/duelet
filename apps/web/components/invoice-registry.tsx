@@ -78,15 +78,15 @@ export function InvoiceRegistry({
   if (query.isError)
     return (
       <RegistryEmpty
-        title="Invoice discovery unavailable"
-        body="The public Arc RPC did not return the configured event range. Retry from the activity screen."
+        title="Invoices unavailable"
+        body="We couldn’t load your invoices. Refresh the page to try again."
       />
     );
   if (!created.length)
     return (
       <RegistryEmpty
         title="No matching invoices found"
-        body="No confirmed creation event matched this role, state, or search. Public RPC history may be incomplete."
+        body="No invoices match this wallet and search. Check your connected wallet or open the payment’s invoice link."
       />
     );
   return (

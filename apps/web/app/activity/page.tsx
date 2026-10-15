@@ -25,11 +25,9 @@ export default function ActivityPage() {
         <ActivityFeed />
       </section>
       <p className="index-note">
-        <strong>Reliability:</strong> logs are requested in bounded 9,999-block
-        ranges, deduplicated by transaction hash and log index, then ordered by
-        block and log position.{' '}
-        {deployment.mode === 'preview' &&
-          'There is no deployment to index yet.'}
+        {deployment.mode === 'preview'
+          ? 'Payment history will be available when a verified payment contract is configured.'
+          : 'This feed may not include every payment. For a specific payment, open its invoice link or transaction in Arc Explorer.'}
       </p>
     </PageShell>
   );
